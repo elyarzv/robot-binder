@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="ais_led_strip_controller" type="ais_led_strip_controller_node" name="ros_dimming_controller" output="screen"/>
+</launch>

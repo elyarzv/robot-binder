@@ -1,0 +1,9 @@
+<launch>
+
+    <arg name="UV_LAMP_CONFIG_FILE" default="phoenix_config.yaml" />
+
+    <rosparam command="load" file="$(find ais_dimming_module)/config/$(arg UV_LAMP_CONFIG_FILE)"/>
+    
+    <node pkg="ais_dimming_module" type="ais_dimming_module_node" name="ros_dimming_controller" output="screen"/>
+
+</launch>

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="mecanum_steering" params="robotBaseFrame odom odomrate cmdveltopic">
+	<gazebo>
+	  <plugin name="gazebo_mecanum_steering" filename="libgazebo_ros_planar_move.so">
+      <!--namespace>/phoenix</namespace-->
+	    <commandTopic>${cmdveltopic}</commandTopic>
+      <odometryTopic>${odom}</odometryTopic>
+      <odometryFrame>${odom}</odometryFrame>
+      <odometryRate>${odomrate}</odometryRate>
+      <robotBaseFrame>${robotBaseFrame}</robotBaseFrame>
+      <publishOdometryTF>false</publishOdometryTF>
+	  </plugin>
+  </gazebo>
+  </xacro:macro>
+</robot>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="robot_namespace" default="/"/>
+  <arg name="inertia_for_simulation" default="true" /> 
+    <param name="robot_description" command="$(find xacro)/xacro --inorder
+                         '$(find phoenix_vehicle_model)/urdf/phoenix.urdf.xacro'
+                         simulation:=$(arg inertia_for_simulation)"/>
+  <group ns="/">
+    <!--Spawn Controller: Robot pose is iteratively selected to spawn on rails-->
+    <node name="spawn_UVM" pkg="gazebo_ros" type="spawn_model"
+          args="-x 0.240394
+                -y -0.433332
+                -z 0.079266
+                -R 0.00
+                -P 0.00
+                -Y -1.562202
+                -unpause
+                -urdf
+                -param robot_description
+                -model /"
+          output="screen"/>
+  </group>
+</launch>

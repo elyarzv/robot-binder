@@ -1,0 +1,17 @@
+local_costmap:
+  global_frame: map
+  footprint_padding: 0.001
+  robot_base_frame: base_link
+  update_frequency: 10.0
+  publish_frequency: 10.0
+  static_map: true
+  rolling_window: true
+  width: 3
+  height: 3
+  resolution: $(env UV_MAP_RESOLUTION)
+  origin_x: 0
+  origin_y: 0
+  track_unknown_space: false
+  plugins:
+    - {name: static_local_obstacles,           type: "costmap_2d::StaticLayer"}
+    - {name: local_obstacles_laser,           type: "costmap_2d::ObstacleLayer"}

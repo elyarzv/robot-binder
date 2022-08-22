@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+    <arg name="data_folder" value="$(env LOG_DIR)"/>
+    <arg name="file_name" default="rail_head_not_detected"/>
+    <!-- Launch recorder node -->
+    <node pkg="ais-bigtop-rosbags" type="prog_record" name="perception_recorder_node" output="screen" respawn="true">
+        <param name="topic_name_file"  value="$(find ais-bigtop-rosbags)/config/perception_topics.config"/>
+        <param name="start_topic"      value="/perception/record/start"/>
+        <param name="stop_topic"       value="/perception/record/stop"/>
+        <param name="data_directory"   value="$(arg data_folder)" type="string"/>
+        <param name="file_prefix"       value="$(arg file_name)"/>
+    </node>
+
+    <rosparam command="load" file="$(find ais-bigtop-rosbags)/config/params.yaml" />
+    <node pkg="ais-bigtop-rosbags" type="monitor_rail_head_detection.py" name="monitor_rail_head_detection" output="screen" respawn="true" />
+
+</launch>

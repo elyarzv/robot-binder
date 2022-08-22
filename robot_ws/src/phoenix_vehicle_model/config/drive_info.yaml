@@ -1,0 +1,25 @@
+diff_drive:
+  joint1: "wheel_left_front_joint"
+  joint2: "wheel_right_front_joint"
+  joint3: "wheel_left_rear_joint"
+  joint4: "wheel_right_rear_joint"
+  vel_topic_name: "embedded/cmd_vel"
+  odom_topic_name: "embedded/wheelodom"
+  update_rate: 100  
+  num_wheel_pairs: 2
+  wheel_separation: 0.61
+  wheel_diameter: 0.25
+  max_wheel_torque: 50.0
+  max_wheel_acceleration: 1.0
+  publish_odom: "true"
+  publish_odom_tf: "false" 
+  publish_wheel_tf: "true" 
+  odometry_frame: "odom" 
+  odometry_source: "encoder" # if you wish to use wheel rotation to calculate odometry use "encoder", if you wish to use groundtruth or gazebo to get the odometry use "world"
+  robot_base_frame: "base_footprint"
+  
+mecanum:
+  robotBaseFrame: "base_footprint"
+  odom: "embedded/wheelodom"
+  odomrate: 20
+  cmdveltopic: "embedded/cmd_vel"

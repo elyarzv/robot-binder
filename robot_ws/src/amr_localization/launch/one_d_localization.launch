@@ -1,0 +1,26 @@
+<launch>
+  <node pkg="amr_localization" type="amr_localization_1d_node" name="wheel_localization_node" output="screen">
+    <rosparam>
+      odometry_topic: embedded/wheelodom
+      pose_topic: pose_1_d
+      wheel_scaling: 0.58267716535
+      topic_type: Pose
+    </rosparam>
+  </node>
+  <node pkg="amr_localization" type="amr_localization_1d_node" name="zed_localization_node" output="screen">
+    <rosparam>
+      odometry_topic: zede/zed_node_e/odom
+      pose_topic: pose_1_d
+      wheel_scaling: 1
+      topic_type: Pose
+    </rosparam>
+  </node>
+  <node pkg="amr_localization" type="amr_localization_1d_node" name="encoder_localization_node" output="screen">
+    <rosparam>
+      odometry_topic: embedded/rail_encoder
+      pose_topic: pose_1_d
+      encoder_counts_per_meter: -20000
+      topic_type: Encoder
+    </rosparam>
+  </node>
+</launch>

@@ -1,0 +1,121 @@
+ARG OSRF_BASE_IMAGE=ros:noetic-ros-base-focal
+
+FROM ${OSRF_BASE_IMAGE} as underlay
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+ARG PROJECT
+ENV HOME_DIR /root
+ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
+
+# Copy project files
+ADD . ${WORKSPACE}
+WORKDIR ${WORKSPACE}
+
+# Generate the script to install the dependencies: /tmp/rosdep-install.sh
+RUN apt-get update && apt-get install curl python3-pip -y && \
+		rm /etc/ros/rosdep/sources.list.d/20-default.list && \
+        rosdep init && \
+		rosdep update --rosdistro ${ROS_DISTRO} && \
+        . /opt/ros/${ROS_DISTRO}/setup.sh && \
+        rosdep install --default-yes --from-paths robot_ws --ignore-src --rosdistro ${ROS_DISTRO} --reinstall --simulate | sed -e "s/  sudo -H //" | tee /tmp/rosdep-install.sh && \
+        rosdep install --default-yes --from-paths binder/underlay_ws --ignore-src --rosdistro ${ROS_DISTRO} --reinstall --simulate | sed -e "s/  sudo -H //" | tee /tmp/rosdep-install-underlay.sh && \
+        cat /tmp/rosdep-install-underlay.sh >> /tmp/rosdep-install.sh
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+    git \ 
+    gettext-base \ 
+    python3-apt \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-setuptools \
+    python3.8 \
+    sharutils && \
+    chmod +x /tmp/rosdep-install.sh && \
+    . /tmp/rosdep-install.sh && \
+    rm -rf /var/lib/apt/lists/*
+
+# Make python3.8 the default python3
+RUN rm /usr/bin/python3 && ln -s /usr/bin/python3.8 /usr/bin/python3
+
+#Lets first build the underlay_ws
+ADD binder/underlay_ws /tmp/underlay_ws
+RUN /bin/bash -c ' \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
+    cd /tmp/underlay_ws && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --merge-install --install-base /opt/underlay_ws'
+
+FROM ${OSRF_BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+COPY --from=underlay /opt/underlay_ws /opt/underlay_ws
+COPY --from=underlay /tmp/rosdep-install.sh /tmp/rosdep-install.sh
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+    git \ 
+    gettext-base \ 
+    python3-apt \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-setuptools \
+    python3.8 \
+    sharutils && \
+    chmod +x /tmp/rosdep-install.sh && \
+    . /tmp/rosdep-install.sh && \
+    rm -rf /var/lib/apt/lists/*
+
+# Make python3.8 the default python3
+RUN rm /usr/bin/python3 && ln -s /usr/bin/python3.8 /usr/bin/python3
+
+# Setup ROS networking
+ARG ROS_MASTER_URI=http://localhost:11311
+ARG ROS_IP=localhost
+ARG ROS_HOSTNAME=localhost
+
+# Setup apt packages
+COPY binder/base/apt.base.pkg /tmp/apt.pkg
+RUN apt-get update && \
+    apt-get install -y \
+        $(cat /tmp/apt.pkg | cut -d# -f1 | envsubst) \
+    && rm -rf /var/lib/apt/lists/* /tmp/apt.pkg
+
+RUN python3 -m pip install --no-cache-dir --upgrade pip
+
+COPY binder/base/py-requirements.txt /tmp/py-requirements.txt
+
+WORKDIR /tmp
+# We are doing it this was because we need to enforce some order
+RUN ls
+RUN cat py-requirements.txt
+RUN cat py-requirements.txt | xargs -n1 python3 -m pip install --user
+
+ARG PROJECT
+ENV HOME_DIR /opt
+ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
+ENV SIMULATION_WS ${HOME_DIR}'/simulation_ws/'
+ENV LOG_DIR '/root/.ais/logs/'
+ENV MAP_DIR '/root/.ais/maps/'
+ENV MISSION_DIR '/root/.ais/missions/'
+
+RUN mkdir -p /opt/${PROJECT} && \
+    mkdir -p ${LOG_DIR} && \
+    mkdir -p ${MAP_DIR} && \
+    mkdir -p ${MISSION_DIR}
+
+## Add the wait script to the image
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait /wait
+RUN chmod +x /wait
+
+## Enable sudo for all users 
+RUN echo 'ALL ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+#
+## adding ade
+COPY binder/ade/env.sh /etc/profile.d/ade_env.sh
+COPY binder/ade/entrypoint /tmp/ade_entrypoint
+#
+## adding entery point
+ENTRYPOINT ["/tmp/ade_entrypoint"]
+CMD ["/bin/sh", "-c", "trap 'exit 147' TERM; tail -f /dev/null & wait ${!}"]

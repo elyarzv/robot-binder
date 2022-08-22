@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>phoenix_vehicle_model</name>
+  <version>1.0.9</version>
+  <description>
+    Vehicle model of phoenix platform
+  </description>
+
+  <license>AIS Confidential</license>
+  <author>Abdullah Mohiuddin</author>
+  <maintainer email="a.mohiuddin@ai-systems.ca">Abdullah Mohiuddin</maintainer>
+  <maintainer email="j.echavarria@ai-systems.ca">Juan Echavarria</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <export>
+    <build_type>catkin</build_type>
+  </export>
+
+</package>

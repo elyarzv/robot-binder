@@ -1,0 +1,14 @@
+wheel_mass: 6
+wheel_radius: 0.127
+wheel_width: 0.098
+wheel_base: 0.362196
+wheel_tread: 0.40
+wheel_height: -0.03
+chassis_mass: 150
+chassis_length: 0.85604
+chassis_width: 0.48817
+chassis_height: 0.360
+ground_clearance: 0.09208
+high_fidelity_model: "true"
+small_wheel_width: 0.098 # if you change the wheel width, please also change wheel_tread accordingly.
+small_wheel_radius: 0.0635 

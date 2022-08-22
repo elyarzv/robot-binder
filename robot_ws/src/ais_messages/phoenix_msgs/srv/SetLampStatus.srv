@@ -1,0 +1,4 @@
+byte[] lamp_values
+---
+bool success
+string message

@@ -1,0 +1,10 @@
+<launch>
+  <param name="/use_sim_time" value="false" />
+  <rosparam command="load" file="$(find uv_base)/config/robot_config.yaml" subst_value="true" />
+
+  <include file="$(find uv_base)/launch/bringup.launch" />
+
+  <test test-name="test_integration" name="test_integration"
+        pkg="this_package" type="test_integration"
+        time-limit="60.0" />
+</launch>

@@ -1,0 +1,20 @@
+version: 0.2
+
+env:
+  secrets-manager:
+    docker_hub_user: DOCKERHUB_DEPLOYMENT:DOCKER_USERNAME
+    docker_hub_pass: DOCKERHUB_DEPLOYMENT:DOCKER_PASSWORD
+
+phases:
+  pre_build:
+    commands:
+      - echo Starting BUILD at `date` 
+  build:
+    commands:
+      - docker login --username ${docker_hub_user} --password ${docker_hub_pass} 
+      - make docker-login
+      - make docker-build-prod-release
+      - make docker-push-prod-release
+  post_build:
+    commands:
+      - echo BUILD successful

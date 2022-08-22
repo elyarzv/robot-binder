@@ -1,0 +1,39 @@
+<launch>
+  <include file="$(find ais_dimming_module)/launch/ais_dimming_module.launch"/>
+
+  <!-- Check that relevant rosparameters are available -->
+  <test test-name="checkDimmingModuleParams"
+        pkg="rostest" 
+        type="paramtest" 
+        name="paramtest_nonempty">
+    <param name="param_name_target" value="max_lamp_number" />
+    <param name="test_duration" value="5.0" />
+    <param name="wait_time" value="10.0" />
+  </test>
+  <!-- Check that relevant rostopics and rosservices are available -->
+  <test test-name="checkDimmingROSAdvertisements" 
+        pkg="rostest" 
+        type="advertisetest" 
+        time-limit="7.0" 
+        retry="3">
+    <rosparam>
+      topics:
+      - name: /embedded/uv_lamp_dimmer_values
+        timeout: 2.
+      services:
+      - name: /set_dimmer_values
+        type: phoenix_msgs/SetLampStatus
+        timeout: 2.
+    </rosparam>
+  </test>
+  <!-- Check that dimming module responds to service clients properly-->
+  <test test-name="test_DimmingModuleIntensity"
+      pkg="ais_dimming_module"
+      type="test_DimmingModuleIntensity"
+      required="true"
+      time-limit="50.0">
+  </test>
+
+    
+
+</launch>

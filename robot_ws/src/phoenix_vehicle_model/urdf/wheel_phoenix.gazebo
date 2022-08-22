@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      </plugin>
+    </gazebo>
+
+  <gazebo reference="wheel_left_rear_link">
+    <!--material>Gazebo/Grey</material-->
+    <mu1 value="100000.0" />
+    <mu2 value="100000.0" />
+    <kd value="1.0" />
+    <minDepth value="0.0" />
+    <maxVel value="0.0" />
+  </gazebo>
+  <gazebo reference="wheel_right_rear_link">
+    <!--material>Gazebo/Grey</material-->
+    <mu1 value="100000.0" />
+    <mu2 value="100000.0" />
+    <kd value="1.0" />
+    <minDepth value="0.0" />
+    <maxVel value="0.0" />
+  </gazebo>
+  <gazebo reference="wheel_left_front_link">
+    <!--material>Gazebo/Grey</material-->
+    <mu1 value="100000.0" />
+    <mu2 value="100000.0" />
+    <kd value="1.0" />
+    <minDepth value="0.0" />
+    <maxVel value="0.0" />
+  </gazebo>
+  <gazebo reference="wheel_right_front_link">
+    <!--material>Gazebo/Grey</material-->
+    <mu1 value="100000.0" />
+    <mu2 value="100000.0" />
+    <kd value="1.0" />
+    <minDepth value="0.0" />
+    <maxVel value="0.0" />
+  </gazebo>
+</robot>

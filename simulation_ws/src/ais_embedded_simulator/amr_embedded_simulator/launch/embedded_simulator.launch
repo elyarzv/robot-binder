@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+   <node pkg="amr_embedded_simulator" type="embededsimulator" name="embedded_simulator" output="screen">
+      <param name="aux_power_status" value="/embedded/aux_power/status"/>
+      <param name="aux_power_switch" value="/embedded/aux_power/switch"/>
+      <param name="au_relay_status" value="/embedded/power_inverter/status"/>
+      <param name="au_relay_switch" value="/embedded/power_inverter/switch"/>
+      <param name="au_battery_current" value="/embedded/battery/current_draw"/>
+      <param name="battery_state_of_charge" value="/embedded/battery/state_of_charge"/>
+      <param name="au_battery_voltage" value="/embedded/battery/voltage"/>
+      <param name="au_lamp_colour" value="/embedded/LED_strip/fill_colour"/>
+      <param name="au_tempCRU" value="/embedded/cru/temperature"/>
+      <param name="au_encoder_count" value="/embedded/encoder_counts"/>
+      <param name="au_get_firmware_version" value="/embedded/firmware_version/base"/>
+      <param name="au_get_firmware_version_dimming_module" value="/embedded/firmware_version/dimming_module"/>
+      <param name="uv_lamp_dimmer_values" value="/embedded/uv_lamp_dimmer_values"/>
+      <param name="lamp_status" value="/embedded/uv_lamp_status"/>
+      <param name="rail_encoder" value="/embedded/rail_encoder"/>
+      <param name="bumper_front_collision_status" value="/embedded/bumper/front"/>
+      <param name="bumper_back_collision_status" value="/embedded/bumper/back"/>
+      <param name="rail_encoder_source_topic_name" value="/embedded/wheelodom"/>
+      <param name="encoder_counts_per_meter" value= "5000" />
+      <param name="left_front_wheel_contact" value="/wheel_left_front_link/collision" />
+      <param name="left_rear_wheel_contact" value="/wheel_left_rear_link/collision"/>
+      <param name="right_front_wheel_contact" value="/wheel_right_front_link/collision"/>
+      <param name="right_rear_wheel_conact" value="/wheel_right_rear_link/collision"/>
+      <param name="proximity_sensor" value="/embedded/proximiterstatus" />
+      <param name="looprate" value="30"/>    
+   </node>
+</launch>

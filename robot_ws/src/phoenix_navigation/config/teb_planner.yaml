@@ -1,0 +1,117 @@
+controller_frequency: 5
+update_frequency: 10
+publish_frequency: 10
+transform_tolerance: 0.2
+recovery_behavior_enabled: true
+recovery_behaviors: [
+{name: conservative_reset, type: clear_costmap_recovery/ClearCostmapRecovery},
+{name: aggressive_reset, type: clear_costmap_recovery/ClearCostmapRecovery}
+]
+max_planning_retries: 5
+GlobalPlanner:
+  orientation_mode: 0 #0 = Don't specify desired orientation in goal path
+
+NavfnROS:
+  allow_unknown: false # Specifies whether or not to allow navfn to create plans that traverse unknown space.
+  default_tolerance: 0.4 # A tolerance on the goal point for the planner.
+
+TebLocalPlannerROS:
+  acc_lim_theta: 1.0
+  acc_lim_x: 1.0
+  acc_lim_y: 0.5
+  allow_init_with_backwards_motion: true
+  alternative_time_cost: false
+  cmd_angle_instead_rotvel: false
+  costmap_converter:
+    CostmapToLinesDBSRANSAC: {cluster_max_distance: 0.4, cluster_max_pts: 42, cluster_min_pts: 2,
+      convex_hull_min_pt_separation: 0.1, ransac_convert_outlier_pts: true, ransac_filter_remaining_outlier_pts: true,
+      ransac_inlier_distance: 0.1, ransac_min_inliers: 10, ransac_no_iterations: 1307,
+      ransac_remainig_outliers: 5}
+    CostmapToPolygonsDBSMCCH: {cluster_max_distance: 0.4}
+  costmap_converter_plugin: costmap_converter::CostmapToLinesDBSRANSAC
+  costmap_converter_rate: 15
+  costmap_converter_spin_thread: true
+  costmap_obstacles_behind_robot_dist: 10.0
+  dt_hysteresis: 0.02
+  dt_ref: 0.34
+  dynamic_obstacle_inflation_dist: $(env ROBOT_GLOBAL_INFLATION)
+  enable_homotopy_class_planning: true
+  enable_multithreading: true
+  exact_arc_length: false
+  feasibility_check_no_poses: 1
+  footprint_model:
+    type: polygon
+    vertices: [[$(env ROBOT_FRONT),$(env ROBOT_LEFT)],[$(env ROBOT_FRONT),$(env ROBOT_RIGHT)],[$(env ROBOT_REAR),$(env ROBOT_RIGHT)],[$(env ROBOT_REAR),$(env ROBOT_LEFT)]]
+  force_reinit_new_goal_dist: 1.0
+  free_goal_vel: false
+  global_plan_overwrite_orientation: false
+  global_plan_viapoint_sep: 0.3
+  h_signature_prescaler: 0.5
+  h_signature_threshold: 0.1
+  include_costmap_obstacles: true
+  include_dynamic_obstacles: false
+  inflation_dist: $(env ROBOT_GLOBAL_INFLATION)
+  is_footprint_dynamic: false
+  legacy_obstacle_association: false
+  map_frame: /map
+  max_global_plan_lookahead_dist: 1.5
+  max_number_classes: 13
+  max_vel_theta: 1.0
+  max_vel_x: 0.3
+  max_vel_x_backwards: 0.3
+  max_vel_y: 0.3
+  min_obstacle_dist: $(env ROBOT_PADDING)
+  min_samples: 3
+  min_turning_radius: 0.0
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  obstacle_association_cutoff_factor: 3.0
+  obstacle_association_force_inclusion_factor: 1.5
+  obstacle_cost_exponent: 1.0
+  obstacle_cost_exponential: 6
+  obstacle_heading_threshold: 0.26
+  obstacle_keypoint_offset: 0.1
+  obstacle_poses_affected: 1
+  odom_topic: /odometry/filtered
+  optimization_activate: true
+  optimization_verbose: false
+  oscillation_recovery: true
+  penalty_epsilon: 0.01
+  publish_feedback: false
+  roadmap_graph_area_length_scale: 1.0
+  roadmap_graph_area_width: 5.0
+  roadmap_graph_no_samples: 15
+  selection_alternative_time_cost: false
+  selection_cost_hysteresis: 1.0
+  selection_obst_cost_scale: 2.0
+  selection_prefer_initial_plan: 0.97
+  selection_viapoint_cost_scale: 1.0
+  shrink_horizon_backup: true
+  sim_time: 1.8
+  simple_exploration: false
+  switching_blocking_period: 0.0
+  teb_autosize: true
+  via_points_ordered: false
+  viapoints_all_candidates: true
+  visualize_hc_graph: false
+  visualize_with_time_as_z_axis_scale: 0.0
+  weight_acc_lim_theta: 1.0
+  weight_acc_lim_x: 1.0
+  weight_acc_lim_y: 1.0
+  weight_adapt_factor: 54.449999999999996
+  weight_dynamic_obstacle: 10.0
+  weight_dynamic_obstacle_inflation: 0.1
+  weight_inflation: 1.0
+  weight_kinematics_forward_drive: 0.0
+  weight_kinematics_nh: 9.9
+  weight_kinematics_turning_radius: 0.0
+  weight_max_vel_theta: 1.0
+  weight_max_vel_x: 2.0
+  weight_max_vel_y: 2.0
+  weight_obstacle: 490.0
+  weight_optimaltime: 1.0
+  weight_shortest_path: 0.0
+  weight_viapoint: 40.0
+  wheelbase: 0.4
+  xy_goal_tolerance: 0.35
+  yaw_goal_tolerance: 0.044

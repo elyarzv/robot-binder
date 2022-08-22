@@ -1,0 +1,199 @@
+#!groovy
+
+@Library('ais-pipeline-library') _
+
+String cron_string = BRANCH_NAME == "develop" ? "0 10 * * *" : ""
+
+pipeline
+{
+  agent
+  {
+   node
+   {
+    label 'linux'
+   }
+  }
+  options
+  {
+    buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                              artifactNumToKeepStr: '5',
+                              daysToKeepStr: '',
+                              numToKeepStr: '5'
+                              ))
+    disableConcurrentBuilds()
+  }
+  triggers { cron(cron_string) }
+  stages
+  {
+    stage('Build')
+    {
+      when
+      {
+        anyOf
+        { 
+          branch 'main'; 
+          branch 'develop'; 
+          branch 'feature/*'
+          branch 'hotfix/*'
+          branch 'bugfix/*'
+          branch 'release/*'
+          branch 'test/*'
+        }
+      }
+      steps
+      {
+        echo "Build number is ${currentBuild.number}"
+        bitbucketStatusNotify(
+                buildState: 'INPROGRESS',
+                repoSlug: 'phoenix-binder',
+                commitId: env.GIT_COMMIT
+        )
+        notifyBuild('STARTED') 
+        
+        echo "Building"
+        buildROSDockerfiles();
+
+      }
+    }
+    stage('Test')
+    {
+      when
+      {
+        anyOf
+        { 
+          branch 'main'; 
+          branch 'develop'; 
+          branch 'feature/*'
+          branch 'hotfix/*'
+          branch 'bugfix/*'
+          branch 'release/*'
+          branch 'test/*'
+        }
+      }
+      steps
+      {
+        echo "Testing"
+        // unitTestsColcon();
+        // publishTestsReports();
+        // sh '''#!/bin/bash
+        // export TAG=`echo $GIT_BRANCH | tr / -`
+        // echo TAG=${TAG} >> binder/testing/.env
+        // cat binder/testing/.env
+        // bash binder/testing/phoenix_tests.bash
+        // '''
+        // sh '''#!/bin/bash 
+        // make docker-start-headless
+        // make docker-run-sim-test
+        // '''
+
+      }
+    }
+    stage('Deploy')
+    {
+      when
+      {
+        anyOf
+        { 
+          branch 'main'; 
+          branch 'develop'; 
+          branch 'feature/*'
+          branch 'hotfix/*'
+          branch 'bugfix/*'
+          branch 'release/*'
+          branch 'test/*'
+        }
+      }
+      steps
+      {
+        script
+        {
+          deployROSContainers();
+        }
+      }
+    }
+    stage('Tag')
+    {
+      when
+      {
+        buildingTag()
+      }
+      steps
+      {
+        echo "Building"
+        bitbucketStatusNotify(
+               buildState: 'INPROGRESS',
+               repoSlug: 'phoenix-binder',
+               commitId: env.GIT_COMMIT
+        )
+        notifyBuild('STARTED')
+        buildROSDockerfiles();
+        deployROSContainers();
+      }
+    } 
+  }
+
+
+  post
+  {
+    success
+    {
+      bitbucketStatusNotify(
+              buildState: 'SUCCESSFUL',
+              repoSlug: 'phoenix-binder',
+              commitId: env.GIT_COMMIT
+      )
+      notifyBuild('SUCCESSFUL')
+    }
+    failure
+    {
+      bitbucketStatusNotify(
+          buildState: 'FAILED',
+          repoSlug: 'phoenix-binder',
+          commitId: env.GIT_COMMIT
+      )
+      notifyBuild('FAILURE')
+    }
+    always
+    { // sh "chmod -R 777 ." This should go just before cleanWs
+      echo currentBuild.currentResult
+      sh '''#!/bin/bash
+      docker system prune --all --force --volumes
+      '''
+      cleanWs ( cleanWhenNotBuilt: false,
+                deleteDirs: true,
+                disableDeferredWipeout: true,
+                notFailBuild: true,
+                patterns: [[pattern: '.gitignore', type: 'INCLUDE']]
+              )
+    }
+  }
+}
+
+def notifyBuild(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+  def details = """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+    <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>"""
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    color = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESSFUL') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (channel: "#phoenix-binder", color: colorCode, message: summary)
+
+}

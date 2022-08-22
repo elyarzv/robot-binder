@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+<arg name="station_file_name" default="/config/stations.yaml" />
+ <node pkg="encoder_simulator" name="encoder_simulator" type="encoder_simulator_node" output="screen">
+	<rosparam file="$(find encoder_simulator)$(arg station_file_name)"/>
+	<param name="mission_cmd_topic_name" type="string" value="mission_cmd"/>
+	<param name="mission_cmd_processed_topic_name" type="string" value="mission_cmd_processed"/>
+ </node>
+ 
+</launch>

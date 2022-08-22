@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<xacro:macro name="realsense-rs200" params="prefix parent rgb_topic child_frame *origin horizontal_fov image_width image_height image_type k1 k2 k3 p1 p2 center_1 center_2 update_rate always_on">
+  <xacro:property name="ixx" value="0.001"/>
+  <xacro:property name="ixy" value="0.000"/>
+  <xacro:property name="ixz" value="0.000"/>
+  <xacro:property name="iyy" value="0.001"/>
+  <xacro:property name="iyz" value="0.000"/>
+  <xacro:property name="izz" value="0.001"/>
+  <xacro:property name="mass" value="0.035"/>
+  <xacro:property name="camera_box_size_x" value="0.1"/>
+  <xacro:property name="camera_box_size_y" value="0.130"/>
+  <xacro:property name="camera_box_size_z" value="0.12"/>
+
+    <!-- Camera link -->
+    <link name="${child_frame}">
+      <inertial>
+        <pose>0.0 0.0 0.0 0 0 0</pose>
+        <inertia>
+          <ixx>${ixx}</ixx>
+          <ixy>${ixy}</ixy>
+          <ixz>${ixz}</ixz>
+          <iyy>${iyy}</iyy>
+          <iyz>${iyz}</iyz>
+          <izz>${izz}</izz>
+        </inertia>
+        <mass>${mass}</mass>
+      </inertial>
+
+      <collision name="collision">
+        <pose>0 0.0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>${camera_box_size_x} ${camera_box_size_y} ${camera_box_size_z}</size>
+          </box>
+        </geometry>
+      </collision>
+      <pose>0.0 0.0 0.0 0 0 0</pose>
+    </link>  
+
+    <!-- Connect camera to parent frame-->
+    <joint name="${child_frame}" type="fixed">
+        <parent link="${parent}"/>
+        <child link="${child_frame}"/>
+        <xacro:insert_block name="origin"/>
+    </joint>
+
+ <link name="${prefix}_camera_link_optical"/>
+
+ <joint name="${prefix}camera_optical_joint" type="fixed">
+    <parent link="${child_frame}"/>
+    <child link="${prefix}_camera_link_optical"/>
+    <origin xyz="0 0 0" rpy="-1.57 0 4.71"/>
+  </joint>
+
+<gazebo reference="${child_frame}">
+    <sensor type="depth" name="${prefix}">
+        <always_on>${always_on}</always_on>
+        <update_rate>${update_rate}</update_rate>
+        <camera name="${prefix}">
+            <horizontal_fov>${horizontal_fov}</horizontal_fov>
+            <image>
+                <width>${image_width}</width>
+                <height>${image_height}</height>
+                <format>${image_type}</format>
+            </image>
+            <distortion>
+                <k1>${k1}</k1>
+                <k2>${k2}</k2>
+                <k3>${k3}</k3>
+                <p1>${p1}</p1>
+                <p2>${p2}</p2>
+                <center>${center_1} ${center_2}</center>
+            </distortion>
+        </camera>
+        <plugin name="plugin_name" filename="libgazebo_ros_depth_camera.so">
+            <ros>
+            <namespace>sensing</namespace>
+            </ros>
+           <cameraName>${prefix}</cameraName>
+             <imageTopicName>${rgb_topic}</imageTopicName>
+            <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+            <depthImageTopicName>depth/image_raw</depthImageTopicName>
+            <!-- neither camera info is getting published, frame_id is empty
+                in points and both image headers -->
+             <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+            <pointCloudTopicName>points</pointCloudTopicName>
+            <frameName>${prefix}_camera_link_optical</frameName>
+            <!-- TODO(lucasw) is this used by depth camera at all? -->
+             <hackBaseline>0.07</hackBaseline>
+            <pointCloudCutoff>0.001</pointCloudCutoff>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+        </plugin>
+    </sensor>
+    <material>Gazebo/Green</material>
+</gazebo>
+
+</xacro:macro>
+</robot>

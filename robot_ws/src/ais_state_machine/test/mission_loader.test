@@ -1,0 +1,9 @@
+<launch>
+  <test test-name="checkMissionLoading"
+        pkg="ais_state_machine"
+        type="MissionLoaderTestSuite"
+        required="true"
+        time-limit="30.0">
+  </test>
+
+</launch>

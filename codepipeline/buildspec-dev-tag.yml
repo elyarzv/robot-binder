@@ -1,0 +1,43 @@
+version: 0.2
+env:
+  secrets-manager:
+    ais_password: ais_password:PASSW
+    id_rsa: bitbucket-deployment-ssh-parse:id_rsa
+    id_rsa_pub: bitbucket-deployment-ssh-parse:id_rsa.pub
+    docker_hub_user: DOCKERHUB_DEPLOYMENT:DOCKER_USERNAME
+    docker_hub_pass: DOCKERHUB_DEPLOYMENT:DOCKER_PASSWORD
+phases:
+  pre_build:
+    commands:   
+      - echo Starting BUILD at `date` 
+      - mkdir -p ~/.ssh                                                                                                                                                                                    
+      - echo -e ${id_rsa} | sed 's/^-e //' > ~/.ssh/id_rsa                                                                                                                                                 
+      - echo ${id_rsa_pub} > ~/.ssh/id_rsa.pub                                                                                                                                                             
+      - chmod 600 ~/.ssh/id_rsa                                                                                                                                                                            
+      - apt-get update -y; apt-get install expect -qy                                                                                                                                                      
+      - THIS_SCRIPT="$(date +%Y-%m-%d_%H-%M-%S-%N)".sh                                                                                                                                                     
+      - rm -rf ~/temp; mkdir -p ~/temp                                                                                                                                                                     
+      - echo 'echo ${ais_password}' > ~/temp/$THIS_SCRIPT                                                                                                                                                         
+      - echo 'Host bitbucket.org \n                                                                                                                                                                        
+                HostName bitbucket.org \n                                                                                                                                                                  
+                User git \n                                                                                                                                                                                
+                IdentityFile /root/.ssh/id_rsa \n                                                                                                                                                          
+                IdentitiesOnly yes                                                                                                                                                                         
+             ' > ~/.ssh/config                                                                                                                                                                             
+      - chmod +x ~/temp/$THIS_SCRIPT;                                                                                                                                                                      
+      - eval "$(ssh-agent -s)"; sleep 0.5;                                                                                                                                                                 
+      - DISPLAY=":0.0" SSH_ASKPASS="/root/temp/$THIS_SCRIPT" setsid ssh-add ~/.ssh/id_rsa </dev/null                                                                                                       
+      - rm -rf ~/temp; mkdir -p ~/temp;                                                                                                                                                                    
+      - ssh -T git@bitbucket.org
+  build:
+    commands:
+      - make docker-login 
+      - docker login --username ${docker_hub_user} --password ${docker_hub_pass} 
+      - IMAGE_TAG=$(git describe --tags --abbrev=0)
+      - git checkout $IMAGE_TAG 
+      - make src-update-submodules 
+      - make docker-build-dev-release
+      - make docker-push-dev-release
+  post_build:
+    commands:
+      - echo BUILD successfull

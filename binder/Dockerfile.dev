@@ -1,0 +1,168 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE} as build-setup
+
+WORKDIR /opt
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG PROJECT
+ENV HOME_DIR /root
+ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
+ENV GAZEBO_DIR ${HOME_DIR}'/.gazebo'
+ENV GAZEBO_MODEL_PATH ${GAZEBO_DIR}'/models'
+ENV GAZEBO_RESOURCE_PATH ${GAZEBO_DIR}'/worlds'
+
+# Copy project
+ADD binder/underlay_ws /tmp/underlay_ws
+ADD robot_ws ${WORKSPACE}/robot_ws
+ADD simulation_ws ${WORKSPACE}/simulation_ws
+RUN mkdir -p ${WORKSPACE} && \
+    mkdir -p ${GAZEBO_MODEL_PATH} && \
+    mkdir -p ${GAZEBO_RESOURCE_PATH}
+
+COPY binder/dev/apt.dev.pkg /tmp/apt.pkg
+RUN apt-get update && \
+    apt-get install -y \
+        $(cat /tmp/apt.pkg | cut -d# -f1 | envsubst) \
+    && rm -rf /var/lib/apt/lists/* /tmp/apt.pkg
+
+RUN /bin/bash -c ' \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
+    cd /tmp/underlay_ws && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --merge-install --install-base /opt/underlay_ws'
+
+WORKDIR ${WORKSPACE}
+
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    . /opt/underlay_ws/setup.sh && \
+    apt-get update && \ 
+    rosdep install --from-paths ${WORKSPACE}/simulation_ws --ignore-src -r -y && \
+    apt-get update -y && apt-get upgrade -y && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+FROM build-setup AS build-unit-tests
+
+WORKDIR ${WORKSPACE}
+
+RUN /bin/bash -c ' \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
+    . /opt/underlay_ws/setup.bash && \
+    cd robot_ws && \
+    colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON  && \
+    colcon graph --legend && \
+    . install/setup.bash'
+
+RUN /bin/bash -c ' \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
+    . /opt/underlay_ws/setup.bash && \
+    . ${WORKSPACE}/robot_ws/install/setup.bash && \
+    cd simulation_ws && \
+    colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON  && \
+    colcon graph --legend && \
+    . install/setup.bash'
+
+RUN /bin/bash -c ' \
+	. /opt/ros/${ROS_DISTRO}/setup.bash && \
+	. /opt/underlay_ws/setup.bash && \
+	. ${WORKSPACE}/robot_ws/install/setup.bash && \
+	cd ${WORKSPACE}/robot_ws && \
+	colcon test --merge-install --executor sequential --retest-until-pass 9 --event-handlers console_direct+ && \
+	colcon test-result --all --verbose'
+
+
+WORKDIR ${WORKSPACE}/robot_ws
+RUN lcov --capture --directory build/ --output-file phoenix-binder-robot-ws.info
+RUN genhtml phoenix-binder-robot-ws.info --output-directory phoenix_binder_robot_ws_html_coverage_report
+
+FROM scratch AS export-unit-tests
+ARG PROJECT
+ENV HOME_DIR /root
+ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
+WORKDIR ${WORKSPACE}/robot_ws
+COPY --from=build-unit-tests ${WORKSPACE}/robot_ws/phoenix_binder_robot_ws_html_coverage_report /
+
+# Build runtime image
+FROM ${BASE_IMAGE} as build-release
+
+WORKDIR /opt
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG PROJECT
+ENV HOME_DIR /root
+ENV WORKSPACE ${HOME_DIR}'/'${PROJECT}
+ENV GAZEBO_DIR ${HOME_DIR}'/.gazebo'
+ENV GAZEBO_MODEL_PATH ${GAZEBO_DIR}'/models'
+ENV GAZEBO_RESOURCE_PATH ${GAZEBO_DIR}'/worlds'
+
+# Copy project
+ADD binder/underlay_ws /tmp/underlay_ws
+ADD robot_ws ${WORKSPACE}/robot_ws
+ADD simulation_ws ${WORKSPACE}/simulation_ws
+RUN mkdir -p ${WORKSPACE} && \
+    mkdir -p ${GAZEBO_MODEL_PATH} && \
+    mkdir -p ${GAZEBO_RESOURCE_PATH}
+
+COPY binder/dev/apt.dev.pkg /tmp/apt.pkg
+RUN apt-get update && \
+    apt-get install -y \
+        $(cat /tmp/apt.pkg | cut -d# -f1 | envsubst) \
+    && rm -rf /var/lib/apt/lists/* /tmp/apt.pkg
+
+RUN /bin/bash -c ' \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
+    cd /tmp/underlay_ws && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --merge-install --install-base /opt/underlay_ws'
+
+WORKDIR ${WORKSPACE}
+
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    . /opt/underlay_ws/setup.sh && \
+    apt-get update && \ 
+    rosdep install --from-paths ${WORKSPACE}/simulation_ws/src --ignore-src -r -y && \
+    apt-get update -y && apt-get upgrade -y && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN /bin/bash -c ' \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
+    . /opt/underlay_ws/setup.bash && \
+    cd ${WORKSPACE}/robot_ws/ && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --merge-install --install-base /opt/${PROJECT} && \
+    colcon graph --legend && \
+    . /opt/${PROJECT}/setup.bash && \
+    . /opt/${PROJECT}/local_setup.bash'
+
+RUN /bin/bash -c ' \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
+    . /opt/underlay_ws/setup.bash && \
+    . /opt/${PROJECT}/setup.bash && \
+    cd ${WORKSPACE}/simulation_ws/ && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --merge-install --install-base /opt/simulation_ws && \
+    colcon graph --legend && \
+    . /opt/simulation_ws/setup.bash && \
+    . /opt/simulation_ws/local_setup.bash'
+
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    . /opt/underlay_ws/setup.sh && \
+    . /opt/${PROJECT}/setup.sh && \
+    apt-get update && \ 
+    rosdep install --from-paths robot_ws/src --ignore-src -r -y && \
+    rosdep install --from-paths simulation_ws/src --ignore-src -r -y && \
+    apt-get update -y && apt-get upgrade -y && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN /bin/bash -c 'rm -rf build install log' 
+COPY binder/dev/bashrc /tmp/bashrc
+COPY binder/dev/Makefile /root/phoenix1/Makefile
+COPY binder/dev/Makefile ${HOME}/${PROJECT}/Makefile
+
+# Adding scripts
+COPY binder/scripts/run_simulation.sh /tmp/run_simulation.sh
+COPY binder/scripts/sleep_infinity.sh /tmp/sleep_infinity.sh
+COPY binder/scripts/run_sim_test.sh /tmp/run_sim_test.sh
+COPY binder/scripts/wait_for_complete.bash /tmp/wait_for_complete.bash
+
+COPY binder/dev/workspace.sh /opt/${PROJECT}/.env.sh
+COPY binder/ade/entrypoint /tmp/entrypoint
+ENTRYPOINT ["/tmp/entrypoint"]
+CMD ["/bin/sh", "-c", "trap 'exit 147' TERM; tail -f /dev/null & wait ${!}"]

@@ -1,0 +1,8 @@
+<launch>
+
+    <!--include file="$(find ais_dimming_module)/launch/ais_dimming_module.launch"/-->
+    <include file="$(find ais_state_machine)/launch/phoenix_state_machine.launch">
+        <arg name="ROBOT_MISSION_CONFIG_FILE" value="testRobotMissionConfig.yaml"/>
+    </include>
+
+</launch>

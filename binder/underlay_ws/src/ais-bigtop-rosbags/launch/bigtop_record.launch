@@ -1,0 +1,24 @@
+<launch>
+
+    <arg name="data_folder" default="/ugv/ais_ugv2_log/"/>
+    <arg name="file_name" default="unnamed"/>
+    <!-- Launch recorder node -->
+    <node pkg="ais-bigtop-rosbags" type="prog_record" name="recorder_node" output="screen" respawn="true">
+        <param name="topic_name_file"  value="$(find ais-bigtop-rosbags)/config/topics.config"/>
+        <param name="start_topic"      value="/record/start"/>
+        <param name="stop_topic"       value="/record/stop"/>
+        <param name="data_directory"   value="$(arg data_folder)"/>
+        <param name="file_prefix"       value="$(arg file_name)"/>
+    </node>
+    <arg name="poll_period" default="5.0"/>
+
+    <node pkg="ais-bigtop-rosbags" name="cpu_monitor" type="monitor.py" output="screen">
+      <param name="poll_period" value="$(arg poll_period)"/>
+    </node>
+
+    <node pkg="ais-bigtop-rosbags" name="pickup_monitor" type="monitor_node_threads.py" output="screen">
+      <param name="data_directory" value="$(arg data_folder)"/>
+    </node>
+
+
+</launch>

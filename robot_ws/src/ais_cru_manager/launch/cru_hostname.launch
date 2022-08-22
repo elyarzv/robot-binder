@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="ais_cru_manager" type="ais_cru_manager_node" output="screen" name="cru_hostname"/>
+
+</launch>

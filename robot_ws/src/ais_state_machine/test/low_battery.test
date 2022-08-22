@@ -1,0 +1,13 @@
+<launch>
+  <rosparam command="load" file="$(find ais_state_machine)/config/defaultRobotMissionConfig.yaml"/>
+  <rosparam command="load" file="$(find ais_state_machine)/config/testDimmingParameters.yaml"/>
+  <include file="$(find ais_state_machine)/launch/test_state_machine.launch"/>
+  
+  <test test-name="checkLowBattery"
+        pkg="ais_state_machine"
+        type="LowBatteryTest"
+        required="true"
+        time-limit="15.0">
+  </test>
+
+</launch>

@@ -1,0 +1,15 @@
+<launch>
+  <!-- Load Mission specific parameters that the state machine checks for before running-->
+  <rosparam command="load" file="$(find ais_state_machine)/config/defaultRobotMissionConfig.yaml"/>
+  <!-- <param name="MISSION_DIR" type="string" value="/home/ais/robot_ws/install/share/ais_state_machine/test/" /> gets overwritten by StateMachineTestSuite::setMissionDir() -->
+  <rosparam command="load" file="$(find ais_state_machine)/config/testDimmingParameters.yaml"/>
+
+  <!-- Test individual states of Disinfection missions for functionality purposes -->
+  <test test-name="IndividualStateTests"
+        pkg="ais_state_machine"
+        type="IndividualStateTests"
+        required="true"
+        time-limit="120.0">
+  </test>
+
+</launch>

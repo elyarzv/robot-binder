@@ -1,0 +1,10 @@
+# rail positions in pixels in .pgm file
+rail_positions:
+    - [111, 149]
+    - [111, 109]
+    - [111, 78]
+    - [111, 43]
+    - [56, 43]
+    - [56, 78]
+    - [56, 109]
+    - [56, 149]

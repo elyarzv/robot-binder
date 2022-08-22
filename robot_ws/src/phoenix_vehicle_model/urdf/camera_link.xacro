@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="camera_link" params="name x y z roll pitch yaw">
+  <link name="${name}"/>
+  <joint name="${name}_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="${name}"/>
+    <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
+  </joint>
+  </xacro:macro>
+</robot>

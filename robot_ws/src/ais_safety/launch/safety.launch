@@ -1,0 +1,18 @@
+<launch>
+  <!--arg name="output_level" default="log"-->
+
+<group unless="$(optenv UV_SIMULATION false)">
+  <node name="safety_node" pkg="ais_safety" type="ais_safety_node" args="sick_scan:=scan" output="screen"/>
+  <node name="zero_cmd_vel_node" pkg="ais_safety" type="zero_cmd_vel_pub.py"/>
+</group>
+
+<group if="$(optenv UV_SIMULATION false)">
+  <node name="embeddedsimulation" pkg="uv_hardware" type="embededsimulator"/>
+	<group>
+  <remap from="/cmd_vel" to="/cmd_vel_embedded"/>
+  <node name="safety_node" pkg="ais_safety" type="ais_safety_node" args="sick_scan:=scan" output="screen"/>
+  <node name="zero_cmd_vel_node" pkg="ais_safety" type="zero_cmd_vel_pub.py"/>
+  </group>
+</group>
+
+</launch>

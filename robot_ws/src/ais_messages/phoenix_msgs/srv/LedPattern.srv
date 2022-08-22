@@ -1,0 +1,15 @@
+uint32 pattern
+uint32 rate
+float32 colour
+uint32 red
+uint32 green
+uint32 blue
+uint32 size
+uint32 fill_percent
+bool use_RGB
+uint8 SOLID=0
+uint8 FILLING=1
+uint8 SCROLLING=2
+uint8 BLINKING=3
+---
+bool response

@@ -1,0 +1,100 @@
+diagnostics_topics:
+  inference_image_topic:
+    topic_name: "inference_image"
+    error_code: "100013"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.04, 'max':10}
+    tolerance: 0.1
+    window_size: 10 
+  zed_camera_rgb_image_topic:
+    topic_name: "zeda/zed_node_a/left/image_rect_color"
+    error_code: "100002"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  front_bumper_topic:
+    topic_name: "embedded/bumper/front"
+    error_code: "230008"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  back_bumper_topic:
+    topic_name: "embedded/bumper/back"
+    error_code: "230009"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  battery_current_draw_topic:
+    topic_name: "embedded/battery/current_draw"
+    error_code: "130004"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  battery_level_topic:
+    topic_name: "embedded/battery/state_of_charge"
+    error_code: "130005"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  external_encoder_topic:
+    topic_name: "embedded/rail_encoder"
+    error_code: "130006"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  uv_lamp_status_topic:
+    topic_name: "embedded/uv_lamp_status"
+    error_code: "230007"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  embedded_left_motor_driver_read_ff:
+    topic_name: "embedded/left_motor_driver/read_ff"
+    error_code: "-1"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  embedded_right_motor_driver_read_ff:
+    topic_name: "embedded/right_motor_driver/read_ff"
+    error_code: "-1"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  embedded_power_inverter_status:
+    topic_name: "embedded/power_inverter/status"
+    error_code: "230003"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  scan_multi_filtered:
+    topic_name: "scan_multi_filtered"
+    error_code: "110001"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  embedded_proximiterstatus:
+    topic_name: "embedded/proximiterstatus"
+    error_code: "130010"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.2, 'max':10}
+    tolerance: 0.1
+    window_size: 10
+  is_online:
+    topic_name: "is_online"
+    error_code: "130080"
+    error_msg: "TBD"
+    freq_bounds: {'min':0.002, 'max':0.1}
+    tolerance: 0.0005
+    window_size: 480
+

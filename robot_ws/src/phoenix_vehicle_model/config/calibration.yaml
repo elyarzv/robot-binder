@@ -1,0 +1,142 @@
+base_link2imu:
+  x: 0.29805
+  y: 0.06682
+  z: 0.01546122
+  roll: 3.14
+  pitch: 0.0
+  yaw: 1.57
+
+base_link2laser_front:
+  x: 0.36799
+  y: -0.210
+  z: 0.30746
+  roll: 0.0
+  pitch: 3.14
+  yaw: 2.355
+  min_angle: -2.356195
+  max_angle: 2.356195
+  max_range: 30
+  min_range: 0.2
+  visualize: "false"
+  samples: 540
+  resolution: 0.33
+  update_rate: 15
+
+base_link2laser_back:
+  x: -0.34201
+  y: 0.210
+  z: 0.30746
+  roll: 0.0
+  pitch: 3.14
+  yaw: -0.7855
+  min_angle: -2.356195
+  max_angle: 2.356195
+  max_range: 30
+  min_range: 0.2
+  visualize: "false"
+  samples: 540
+  resolution: 0.33
+  update_rate: 15
+
+zeda_left_camera_frame:
+  x: 0.124
+  y: 0.0
+  z: 1.506
+  roll: -0.643
+  pitch: 0.0
+  yaw: 4.71
+
+zedb_left_camera_frame:
+  x: 0.0
+  y: -0.124
+  z: 1.506
+  roll: -0.643
+  pitch: 0.0
+  yaw: 3.14 
+
+zedc_left_camera_frame:
+  x: 0.0
+  y: 0.124
+  z: 1.512
+  roll: -0.643
+  pitch: 0.0
+  yaw: 0 
+
+zedd_left_camera_frame:
+  x: -0.124
+  y: 0.0
+  z: 1.512
+  roll: -0.643
+  pitch: 0.0
+  yaw: 1.57
+
+base_link2camera_rear:
+  x: -0.5
+  y: 0.0
+  z: 0.64524454
+  roll: 0.0
+  pitch: 0.837758
+  yaw: 3.141592
+  horizontal_fov: 1.46608
+  image_width: 320 
+  image_height: 180 
+  image_type: "R8G8B8" 
+  k1: 0.0 
+  k2: 0.0
+  k3: 0.0
+  p1: 0.0 
+  p2: 0.0 
+  center_1: 0.5 
+  center_2: 0.5
+  update_rate: 15
+  always_on: "true"  
+
+base_link2camera_front:
+  x: 0.46071001
+  y: 0.16
+  z: 0.64524454
+  roll: 0.0
+  pitch: 0.837758
+  yaw: 0
+  horizontal_fov: 1.46608
+  image_width: 320 
+  image_height: 180 
+  image_type: "R8G8B8" 
+  k1: 0.0 
+  k2: 0.0
+  k3: 0.0
+  p1: 0.0 
+  p2: 0.0 
+  center_1: 0.5 
+  center_2: 0.5
+  update_rate: 15
+  always_on: "true"  
+
+base_link2camera_fisheye:
+  x: 0.435
+  y: 0.0
+  z: 1.480
+  roll: 0.0
+  pitch: 0.0
+  yaw: 0.0
+  horizontal_fov: 3.141592
+  image_width: 320 
+  image_height: 180 
+  image_type: "R8G8B8" 
+  clip_near: 0.15
+  clip_far: 1500
+  noise_type: "gaussian"
+  noise_mean: 0.0
+  noise_stddev: 0.0001
+  lens_type: "custom"
+  lens_c1: 1.0
+  lens_c2: 1.95
+  lens_f: 6
+  lens_fun: "tan"
+  scale_to_hfov: "true"
+  cutoff_angle: 2.84488668
+  env_texture_size: 512
+  namespace: "sensing"
+  hack_baseline: 0.2
+  update_rate: 15
+  always_on: "true"

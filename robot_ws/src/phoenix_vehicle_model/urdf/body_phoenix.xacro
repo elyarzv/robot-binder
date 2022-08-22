@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="simulation" default="false" />
+  <xacro:macro name="body_macro" params="suffix parent wheel_radius wheel_base chassis_mass chassis_width chassis_length chassis_height high_fidelity_model">
+  <xacro:property name="pi" value="3.1415926835897931" />
+
+    <joint name="${suffix}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <origin rpy="0 0 0" xyz="0 0 0.0"/>
+      <child  link="${suffix}_link"/>
+    </joint>  
+    <link name="${suffix}_link">
+      <inertial>
+        <origin xyz="0 0 -0.15" rpy="1.57 0 0"/>
+        <mass value="${chassis_mass}"/>
+        <inertia ixx="${(chassis_width*chassis_width+chassis_height*chassis_height)*chassis_mass/12.0}" ixy="0.0" ixz="0.0" 
+                 iyy="${(chassis_length*chassis_length+chassis_height*chassis_height)*chassis_mass/12.0}" iyz="0.0" 
+                 izz="${(chassis_width*chassis_width+chassis_length*chassis_length)*chassis_mass/12.0}"/>
+      </inertial>
+
+      <visual>
+          <origin xyz="0.0 0 0" rpy="-1.57 0 0"/>
+          <geometry>
+            <xacro:if value="${high_fidelity_model}">
+                <mesh filename="package://phoenix_vehicle_model/meshes/uv/base/Phoenix_Body_Simplified.STL" scale="0.001 0.001 0.001" />
+            </xacro:if>
+            <xacro:unless value="${high_fidelity_model}">
+                <mesh filename="package://phoenix_vehicle_model/meshes/uv/base/Phoenix_Body_Simplified.STL" scale="0.001 0.001 0.001" />
+            </xacro:unless>
+          </geometry>
+          <material name="black">
+              <color rgba="0.1 0.1 0.1 0.5"/>
+          </material>
+        </visual>
+
+      <collision name="box_collision">
+        <xacro:if value="${high_fidelity_model}">
+          <origin xyz="0.0 0 0" rpy="-1.57 0 0"/>
+          <geometry>
+              <mesh filename="package://phoenix_vehicle_model/meshes/uv/base/Phoenix_Body_Simplified.STL" scale="0.001 0.001 0.001"/>
+          </geometry>
+        </xacro:if>
+
+        <xacro:unless value="${high_fidelity_model}">
+          <origin xyz="0.0 0 ${chassis_height/2}" rpy="0 0 0"/>
+          <geometry>
+              <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+          </geometry>    
+        </xacro:unless>
+      </collision>
+    </link>
+      <gazebo reference="${suffix}_link">
+      <self_collide>false</self_collide>
+      <maxVel>0.0</maxVel>
+      <minDepth>0.000</minDepth>
+      <material>Gazebo/Orange</material>
+    </gazebo>
+
+  </xacro:macro>  
+</robot>

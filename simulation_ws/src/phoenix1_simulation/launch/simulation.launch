@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true" if="$(optenv LAUNCH_GAZEBO true)"/>
+    <arg name="gui" value="false" unless="$(optenv LAUNCH_GAZEBO true)"/>
+    <arg name="headless" value="true" if="$(optenv LAUNCH_GAZEBO true)"/>
+    <arg name="headless" value="false" unless="$(optenv LAUNCH_GAZEBO true)"/>
+    <arg name="world_name" value="$(find phoenix1_simulation)/worlds/multiple_rails.world"/>    
+    <arg name="verbose" value="true" />
+  </include>
+
+  <include file="$(find phoenix1_simulation)/launch/spawn_PHM.launch"></include>
+
+</launch>

@@ -1,0 +1,18 @@
+<launch>
+    <rosparam command="load" file="$(find phoenix1_parameters)/config/amr.yaml" subst_value="true" />
+
+    <node name="zero_cmd_vel_node" pkg="ais_safety" type="zero_cmd_vel_pub.py"/>
+
+    <node name="safety_node" pkg="ais_safety" type="ais_safety_node" output="screen">
+        <remap from="/base_cmd_vel" to="/cmd_vel_state_machine"/>
+        <remap from="/embedded/cmd_vel" to="/cmd_vel_safe"/>
+    </node>
+
+    <node pkg="topic_tools" type="mux" name="safety_cmd_vel_mux"
+            args="embedded/cmd_vel cmd_vel_state_machine cmd_vel_safe mux:=safety_cmd_vel_mux">
+        <param name="initial_topic" value="cmd_vel_safe" />
+    </node>
+
+    <node pkg="ais_state_machine" type="ais_state_machine_safety_mux_selector_node"
+            output="screen" name="ph_state_machine_safety_mux_selector" />
+</launch>

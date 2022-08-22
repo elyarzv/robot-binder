@@ -1,0 +1,330 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="example">
+  <xacro:include filename="$(find phoenix_vehicle_model)/urdf/body_phoenix.xacro" />
+  <xacro:include filename="$(find phoenix_vehicle_model)/urdf/wheel_phoenix.xacro" />
+  <xacro:include filename="$(find phoenix_vehicle_model)/urdf/diff_drive.xacro" />
+  <xacro:include filename="$(find phoenix_vehicle_model)/urdf/skid_steer.xacro" />
+  <xacro:include filename="$(find phoenix_vehicle_model)/urdf/mecanum_steering.xacro" />
+  <xacro:include filename="$(find phoenix_vehicle_model)/urdf/camera_link.xacro" />
+  <xacro:include filename="$(find phoenix_gazebo_imu_description)/urdf/imu.xacro"/>
+  <xacro:include filename="$(find phoenix_gazebo_2d_laser_description)/urdf/laser.xacro"/>
+  <xacro:include filename="$(find phoenix_gazebo_camera_description)/urdf/CP_rgbd_camera.xacro"/>
+  <xacro:include filename="$(find phoenix_gazebo_camera_description)/urdf/CP_fisheye_rgbd_camera.xacro"/>
+  <xacro:include filename="$(find phoenix_vehicle_model)/urdf/bumper_with_sensor.xacro"/>
+
+
+  <xacro:property name="pi" value="3.1415"/>
+  <xacro:arg name="is_differential" default="false"/>
+  <xacro:arg name="is_skid" default="false"/>
+  <xacro:arg name="is_mecanum" default="true"/>
+  <xacro:arg name="is_two_lidars" default="true"/>
+  <xacro:arg name="camera" default="true"/>
+  <xacro:arg name="fisheyecamera" default="true"/>
+
+  <!-- ================ Robot ================ -->
+  <!-- load parameter -->
+
+  <xacro:property name="robot_info" value="${load_yaml('$(find phoenix_vehicle_model)/config/robot_info.yaml')}"/>
+  <xacro:property name="wheel_mass" value="${robot_info['wheel_mass']}"/>
+  <xacro:property name="wheel_radius" value="${robot_info['wheel_radius']}"/>
+  <xacro:property name="wheel_width" value="${robot_info['wheel_width']}"/>
+  <xacro:property name="wheel_base" value="${robot_info['wheel_base']}"/>
+  <xacro:property name="wheel_tread" value="${robot_info['wheel_tread']}"/>
+  <xacro:property name="wheel_height" value="${robot_info['wheel_height']}"/>
+  <xacro:property name="chassis_mass" value="${robot_info['chassis_mass']}"/>
+  <xacro:property name="chassis_length" value="${robot_info['chassis_length']}"/>
+  <xacro:property name="chassis_width" value="${robot_info['chassis_width']}"/>
+  <xacro:property name="chassis_height" value="${robot_info['chassis_height']}"/>
+  <xacro:property name="ground_clearance" value="${robot_info['ground_clearance']}"/>
+  <xacro:property name="high_fidelity_model" value="${robot_info['high_fidelity_model']}"/>
+  <xacro:property name="small_wheel_width" value="${robot_info['small_wheel_width']}"/> 
+  <xacro:property name="small_wheel_radius" value="${robot_info['small_wheel_radius']}"/>   
+  
+  <link name="base_footprint"/>
+
+  <link name="base_link"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 ${ground_clearance}" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:body_macro suffix="base_body"
+                    parent="base_link"
+                    wheel_radius="${wheel_radius}"
+                    wheel_base="${wheel_base}"
+                    chassis_mass="${chassis_mass}"
+                    chassis_length="${chassis_length}"
+                    chassis_width="${chassis_width}"
+                    chassis_height="${chassis_height}"
+                    high_fidelity_model="${high_fidelity_model}"/>
+
+  <xacro:wheel_macro suffix="wheel_right_front"
+                      parent="base_body_link" 
+                      x="${wheel_base/2}" 
+                      y="${-wheel_tread/2}"
+                      z="${wheel_height}" 
+                      yaw="0"
+                      radius="${wheel_radius}" 
+                      width="${wheel_width}"
+                      mass="${wheel_mass}"
+                      high_fidelity_model="${high_fidelity_model}"
+                      wheel_x="${1}"
+                      small_wheel_width= "${small_wheel_width}"
+                      small_wheel_radius= "${small_wheel_radius}" />
+                      
+  <xacro:wheel_macro suffix="wheel_left_front" 
+                      parent="base_body_link" 
+                      x="${wheel_base/2}" 
+                      y="${wheel_tread}"
+                      z="${wheel_height}" 
+                      yaw="${pi}" 
+                      radius="${wheel_radius}" 
+                      width="${wheel_width}"
+                      mass="${wheel_mass}"
+                      high_fidelity_model="${high_fidelity_model}"
+                      wheel_x="${-1}"                      
+                      small_wheel_width= "${small_wheel_width}"
+                      small_wheel_radius= "${small_wheel_radius}" />
+
+  <xacro:wheel_macro suffix="wheel_right_rear" 
+                      parent="base_body_link" 
+                      x="${-wheel_base/2}" 
+                      y="${-wheel_tread/2}"
+                      z="${wheel_height}" 
+                      yaw="0" 
+                      radius="${wheel_radius}" 
+                      width="${wheel_width}"
+                      mass="${wheel_mass}"
+                      high_fidelity_model="${high_fidelity_model}"                      
+                      wheel_x="${1}"                      
+                      small_wheel_width= "${small_wheel_width}"
+                      small_wheel_radius= "${small_wheel_radius}" />
+  
+  <xacro:wheel_macro suffix="wheel_left_rear" 
+                      parent="base_body_link" 
+                      x="${-wheel_base/2}" 
+                      y="${wheel_tread}" 
+                      z="${wheel_height}" 
+                      yaw="${pi}" 
+                      radius="${wheel_radius}"
+                      width="${wheel_width}"
+                      mass="${wheel_mass}"
+                      high_fidelity_model="${high_fidelity_model}"
+                      wheel_x="${-1}"                      
+                      small_wheel_width= "${small_wheel_width}"
+                      small_wheel_radius= "${small_wheel_radius}" />
+
+  <xacro:bumper_with_sensor suffix="front" 
+                      parent="base_body_link" 
+                      x="${chassis_width}" 
+                      y="0" 
+                      z="-0.025" 
+                      box_x="0.01"
+                      box_y="0.01" 
+                      box_z="0.01"
+                      collision_x="0.05" 
+                      collision_y="0.6"
+                      collision_z="0.12"
+                      collision_name="base_footprint_fixed_joint_lump__front_bumper_collision_collision_2" 
+                      bumper_topic_name="/embedded/bumper/readfront" />
+
+  <xacro:bumper_with_sensor suffix="back" 
+                      parent="base_body_link" 
+                      x="${-chassis_width}" 
+                      y="0" 
+                      z="-0.025" 
+                      box_x="0.01"
+                      box_y="0.01" 
+                      box_z="0.01"
+                      collision_x="0.05" 
+                      collision_y="0.6"
+                      collision_z="0.12"
+                      collision_name="base_footprint_fixed_joint_lump__back_bumper_collision_collision_1" 
+                      bumper_topic_name="/embedded/bumper/readback" />
+
+
+  <xacro:property name="drive_info" value="${load_yaml('$(find phoenix_vehicle_model)/config/drive_info.yaml')}"/>
+  <xacro:if value="$(arg is_differential)">
+  <!--  Loading the differential drive for the Wheels  -->
+    <xacro:diff_drive joint1="${drive_info['diff_drive']['joint1']}"
+                      joint2="${drive_info['diff_drive']['joint2']}"
+                      joint3="${drive_info['diff_drive']['joint3']}"
+                      joint4="${drive_info['diff_drive']['joint4']}"
+                      vel_topic_name="none/cmd_vel"
+                      odom_topic_name="${drive_info['diff_drive']['odom_topic_name']}"
+                      update_rate="${drive_info['diff_drive']['update_rate']}"
+                      num_wheel_pairs="${drive_info['diff_drive']['num_wheel_pairs']}"
+                      wheel_separation="${drive_info['diff_drive']['wheel_separation']}"
+                      wheel_diameter="${drive_info['diff_drive']['wheel_diameter']}"
+                      max_wheel_torque="${drive_info['diff_drive']['max_wheel_torque']}"
+                      max_wheel_acceleration="${drive_info['diff_drive']['max_wheel_acceleration']}"
+                      publish_odom="${drive_info['diff_drive']['publish_odom']}"
+                      publish_odom_tf="${drive_info['diff_drive']['publish_odom_tf']}"
+                      publish_wheel_tf="${drive_info['diff_drive']['publish_wheel_tf']}"
+                      odometry_frame="${drive_info['diff_drive']['odometry_frame']}"
+                      odometry_source="${drive_info['diff_drive']['odometry_source']}"
+                      robot_base_frame="${drive_info['diff_drive']['robot_base_frame']}"/>
+                      <!-- =============== Loading the Drive for the Wheels =============== -->
+  </xacro:if>
+
+  <xacro:if value="$(arg is_skid)">
+  <!--  Loading the differential drive for the Wheels  -->
+    <xacro:skid_steer joint1="${drive_info['diff_drive']['joint1']}"
+                      joint2="${drive_info['diff_drive']['joint2']}"
+                      joint3="${drive_info['diff_drive']['joint3']}"
+                      joint4="${drive_info['diff_drive']['joint4']}"
+                      vel_topic_name="${drive_info['diff_drive']['vel_topic_name']}"
+                      odom_topic_name="${drive_info['diff_drive']['odom_topic_name']}"
+                      update_rate="${drive_info['diff_drive']['update_rate']}"
+                      num_wheel_pairs="${drive_info['diff_drive']['num_wheel_pairs']}"
+                      wheel_separation="${drive_info['diff_drive']['wheel_separation']}"
+                      wheel_diameter="${drive_info['diff_drive']['wheel_diameter']}"
+                      max_wheel_torque="${drive_info['diff_drive']['max_wheel_torque']}"
+                      max_wheel_acceleration="${drive_info['diff_drive']['max_wheel_acceleration']}"
+                      publish_odom="${drive_info['diff_drive']['publish_odom']}"
+                      publish_odom_tf="${drive_info['diff_drive']['publish_odom_tf']}"
+                      publish_wheel_tf="${drive_info['diff_drive']['publish_wheel_tf']}"
+                      odometry_frame="${drive_info['diff_drive']['odometry_frame']}"
+                      odometry_source="${drive_info['diff_drive']['odometry_source']}"
+                      robot_base_frame="${drive_info['diff_drive']['robot_base_frame']}"/>
+                      <!-- =============== Loading the Drive for the Wheels =============== -->
+  </xacro:if>
+
+
+   <xacro:if value="$(arg is_mecanum)">
+  <!-- =============== Loading the mecanum drive for the Wheels =============== -->
+   <xacro:mecanum_steering robotBaseFrame="${drive_info['mecanum']['robotBaseFrame']}" 
+                            odom="${drive_info['mecanum']['odom']}" 
+                            odomrate="${drive_info['mecanum']['odomrate']}" 
+                            cmdveltopic="${drive_info['mecanum']['cmdveltopic']}" />
+  <!-- =============== Loading the Drive for the Wheels =============== -->
+   </xacro:if>
+
+  <!-- =============== Sensors =============== -->
+  <xacro:property name="sensor_info" value="${load_yaml('$(find phoenix_vehicle_model)/config/calibration.yaml')}"/>
+
+  <!-- IMU -->
+  <xacro:imu_macro suffix="imu" parent="base_link" namespace=""
+                   x="${sensor_info['base_link2imu']['x']}"
+                   y="${sensor_info['base_link2imu']['y']}"
+                   z="${sensor_info['base_link2imu']['z']}"
+                   roll="${sensor_info['base_link2imu']['roll']}"
+                   pitch="${sensor_info['base_link2imu']['pitch']}"
+                   yaw="${sensor_info['base_link2imu']['yaw']}"
+                   fps="100" />
+
+  <!-- Front Laser Actual Hardware model is TiM5712050101-->
+  <xacro:laser_macro suffix="laser_front" parent="base_link" namespace=""
+                   x="${sensor_info['base_link2laser_front']['x']}"
+                   y="${sensor_info['base_link2laser_front']['y']}"
+                   z="${sensor_info['base_link2laser_front']['z']}"
+                   roll="${sensor_info['base_link2laser_front']['roll']}"
+                   pitch="${sensor_info['base_link2laser_front']['pitch']}"
+                   yaw="${sensor_info['base_link2laser_front']['yaw']}"
+                   min_angle="${sensor_info['base_link2laser_front']['min_angle']}"
+                   max_angle="${sensor_info['base_link2laser_front']['max_angle']}"
+                   max_range="${sensor_info['base_link2laser_front']['max_range']}"
+                   min_range="${sensor_info['base_link2laser_front']['min_range']}"
+                   visualize="${sensor_info['base_link2laser_front']['visualize']}"
+                   samples="${sensor_info['base_link2laser_front']['samples']}"
+                   resolution="${sensor_info['base_link2laser_front']['resolution']}"
+                   update_rate="${sensor_info['base_link2laser_front']['update_rate']}" 
+                   topic_name="/FrontLidar/scan_topic"/>
+
+  <!-- Back Laser Actual Hardware model is TiM5712050101 -->
+  <xacro:if value="$(arg is_two_lidars)">
+    <xacro:laser_macro suffix="laser_back" parent="base_link" namespace=""
+                    x="${sensor_info['base_link2laser_back']['x']}"
+                    y="${sensor_info['base_link2laser_back']['y']}"
+                    z="${sensor_info['base_link2laser_back']['z']}"
+                    roll="${sensor_info['base_link2laser_back']['roll']}"
+                    pitch="${sensor_info['base_link2laser_back']['pitch']}"
+                    yaw="${sensor_info['base_link2laser_back']['yaw']}"
+                    min_angle="${sensor_info['base_link2laser_back']['min_angle']}"
+                    max_angle="${sensor_info['base_link2laser_back']['max_angle']}"
+                    max_range="${sensor_info['base_link2laser_back']['max_range']}"
+                    min_range="${sensor_info['base_link2laser_back']['min_range']}"
+                    visualize="${sensor_info['base_link2laser_back']['visualize']}"
+                    samples="${sensor_info['base_link2laser_back']['samples']}"
+                    resolution="${sensor_info['base_link2laser_back']['resolution']}"
+                    update_rate="${sensor_info['base_link2laser_back']['update_rate']}"
+                    topic_name="/BackLidar/scan_topic"/>
+  </xacro:if>
+
+  <xacro:if value="$(arg camera)">
+  <xacro:realsense-rs200 prefix="rear" parent="base_link"  
+   rgb_topic="/zedb/zed_node_b/left/image_rect_color"
+   child_frame="zedb_camera_center"
+   horizontal_fov="${sensor_info['base_link2camera_rear']['horizontal_fov']}" 
+   image_width="${sensor_info['base_link2camera_rear']['image_width']}" 
+   image_height="${sensor_info['base_link2camera_rear']['image_height']}" 
+   image_type="${sensor_info['base_link2camera_rear']['image_type']}" 
+   k1="${sensor_info['base_link2camera_rear']['k1']}" 
+   k2="${sensor_info['base_link2camera_rear']['k2']}" 
+   k3="${sensor_info['base_link2camera_rear']['k3']}" 
+   p1="${sensor_info['base_link2camera_rear']['p1']}" 
+   p2="${sensor_info['base_link2camera_rear']['p2']}" 
+   center_1="${sensor_info['base_link2camera_rear']['center_1']}" 
+   center_2="${sensor_info['base_link2camera_rear']['center_2']}"
+   update_rate="${sensor_info['base_link2camera_rear']['update_rate']}"
+   always_on="${sensor_info['base_link2camera_rear']['always_on']}"   > 
+	  <origin xyz="${sensor_info['base_link2camera_rear']['x']} ${sensor_info['base_link2camera_rear']['y']} ${sensor_info['base_link2camera_rear']['z']}" 
+	   rpy="${sensor_info['base_link2camera_rear']['roll']} ${sensor_info['base_link2camera_rear']['pitch']} ${sensor_info['base_link2camera_rear']['yaw']}"/>
+   </xacro:realsense-rs200> 
+   </xacro:if>  
+
+  <xacro:if value="$(arg camera)">
+  <xacro:realsense-rs200 prefix="front" parent="base_link" 
+   rgb_topic="/zeda/zed_node_a/left/image_rect_color"
+   child_frame="zeda_camera_center"
+   horizontal_fov="${sensor_info['base_link2camera_front']['horizontal_fov']}" 
+   image_width="${sensor_info['base_link2camera_front']['image_width']}" 
+   image_height="${sensor_info['base_link2camera_front']['image_height']}" 
+   image_type="${sensor_info['base_link2camera_front']['image_type']}" 
+   k1="${sensor_info['base_link2camera_front']['k1']}" 
+   k2="${sensor_info['base_link2camera_front']['k2']}" 
+   k3="${sensor_info['base_link2camera_front']['k3']}" 
+   p1="${sensor_info['base_link2camera_front']['p1']}" 
+   p2="${sensor_info['base_link2camera_front']['p2']}" 
+   center_1="${sensor_info['base_link2camera_front']['center_1']}" 
+   center_2="${sensor_info['base_link2camera_front']['center_2']}"
+   update_rate="${sensor_info['base_link2camera_front']['update_rate']}"
+   always_on="${sensor_info['base_link2camera_front']['always_on']}"   > 
+	  <origin xyz="${sensor_info['base_link2camera_front']['x']} ${sensor_info['base_link2camera_front']['y']} ${sensor_info['base_link2camera_front']['z']}" 
+	   rpy="${sensor_info['base_link2camera_front']['roll']} ${sensor_info['base_link2camera_front']['pitch']} ${sensor_info['base_link2camera_front']['yaw']}"/>
+   </xacro:realsense-rs200> 
+   </xacro:if>  
+
+
+
+   <xacro:if value="$(arg fisheyecamera)">
+   <xacro:fisheye prefix="fisheye" parent="base_link" 
+   horizontal_fov="${sensor_info['base_link2camera_fisheye']['horizontal_fov']}" 
+   image_width="${sensor_info['base_link2camera_fisheye']['image_width']}" 
+   image_height="${sensor_info['base_link2camera_fisheye']['image_height']}" 
+   image_type="${sensor_info['base_link2camera_fisheye']['image_type']}" 
+   clip_near= "${sensor_info['base_link2camera_fisheye']['clip_near']}"
+   clip_far= "${sensor_info['base_link2camera_fisheye']['clip_far']}"
+   noise_type= "${sensor_info['base_link2camera_fisheye']['noise_type']}"
+   noise_mean= "${sensor_info['base_link2camera_fisheye']['noise_mean']}"
+   noise_stddev= "${sensor_info['base_link2camera_fisheye']['noise_stddev']}"
+   lens_type= "${sensor_info['base_link2camera_fisheye']['lens_type']}"
+   lens_c1= "${sensor_info['base_link2camera_fisheye']['lens_c1']}"
+   lens_c2= "${sensor_info['base_link2camera_fisheye']['lens_c2']}"
+   lens_f= "${sensor_info['base_link2camera_fisheye']['lens_f']}"
+   lens_fun= "${sensor_info['base_link2camera_fisheye']['lens_fun']}"
+   scale_to_hfov= "${sensor_info['base_link2camera_fisheye']['scale_to_hfov']}"
+   cutoff_angle= "${sensor_info['base_link2camera_fisheye']['cutoff_angle']}"
+   env_texture_size= "${sensor_info['base_link2camera_fisheye']['env_texture_size']}"
+   namespace= "${sensor_info['base_link2camera_fisheye']['namespace']}"
+   hack_baseline= "${sensor_info['base_link2camera_fisheye']['hack_baseline']}"
+   update_rate="${sensor_info['base_link2camera_fisheye']['update_rate']}"
+   always_on="${sensor_info['base_link2camera_fisheye']['always_on']}"    > 
+	    <origin xyz="${sensor_info['base_link2camera_fisheye']['x']} ${sensor_info['base_link2camera_fisheye']['y']} ${sensor_info['base_link2camera_fisheye']['z']}" 
+	   rpy="${sensor_info['base_link2camera_fisheye']['roll']} ${sensor_info['base_link2camera_fisheye']['pitch']} ${sensor_info['base_link2camera_fisheye']['yaw']}"/>
+   </xacro:fisheye>  
+   </xacro:if>     
+
+</robot>

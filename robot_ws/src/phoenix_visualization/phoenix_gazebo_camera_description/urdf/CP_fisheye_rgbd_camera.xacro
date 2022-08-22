@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<xacro:macro name="fisheye" params="prefix parent *origin horizontal_fov image_width image_height image_type clip_near clip_far noise_type noise_mean noise_stddev lens_type lens_c1 lens_c2 lens_f lens_fun scale_to_hfov cutoff_angle env_texture_size namespace hack_baseline update_rate always_on">
+  <xacro:property name="ixx" value="0.001"/>
+  <xacro:property name="ixy" value="0.000"/>
+  <xacro:property name="ixz" value="0.000"/>
+  <xacro:property name="iyy" value="0.001"/>
+  <xacro:property name="iyz" value="0.000"/>
+  <xacro:property name="izz" value="0.001"/>
+  <xacro:property name="mass" value="0.035"/>
+  <xacro:property name="camera_box_size_x" value="0.1"/>
+  <xacro:property name="camera_box_size_y" value="0.130"/>
+  <xacro:property name="camera_box_size_z" value="0.12"/>
+
+    <!-- Camera link -->
+    <link name="${prefix}rs200_camera">
+      <inertial>
+        <pose>0.0 0.0 0.0 0 0 0</pose>
+        <inertia>
+          <ixx>${ixx}</ixx>
+          <ixy>${ixy}</ixy>
+          <ixz>${ixz}</ixz>
+          <iyy>${iyy}</iyy>
+          <iyz>${iyz}</iyz>
+          <izz>${izz}</izz>
+        </inertia>
+        <mass>${mass}</mass>
+      </inertial>
+
+      <collision name="collision">
+        <pose>0 0.0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>${camera_box_size_x} ${camera_box_size_y} ${camera_box_size_z}</size>
+          </box>
+        </geometry>
+      </collision>
+      <pose>0.0 0.0 0.0 0 0 0</pose>
+    </link>  
+
+    <!-- Connect camera to parent frame-->
+    <joint name="${prefix}realsense_joint" type="fixed">
+        <parent link="${parent}"/>
+        <child link="${prefix}rs200_camera"/>
+        <xacro:insert_block name="origin"/>
+    </joint>
+
+<gazebo reference="${prefix}rs200_camera">
+  <sensor name="camera" type="wideanglecamera">
+    <camera name="left">
+      <pose>0 0 0 0 0 0</pose>
+      <horizontal_fov>${horizontal_fov}</horizontal_fov>
+      <image>
+        <width>${image_width}</width>
+        <height>${image_height}</height>
+        <format>${image_type}</format>
+      </image>
+      <clip>
+        <near>${clip_near}</near>
+        <far>${clip_far}</far>
+      </clip>
+      <noise>
+        <type>${noise_type}</type>  
+        <mean>${noise_mean}</mean>
+        <stddev>${noise_stddev}</stddev>
+      </noise>
+      <lens>
+        <type>${lens_type}</type>     
+        <custom_function> <!-- manually defined mapping function r = c1*f*fun(theta/c2 + c3) More information here: https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function -->
+          <c1>${lens_c1}</c1>    <!-- linear scaling -->
+          <c2>${lens_c2}</c2>       <!-- angle scaling -->
+          <f>${lens_f}</f>       <!-- one more scaling parameter -->
+          <fun>${lens_fun}</fun>   <!-- one of sin,tan,id -->
+        </custom_function>    
+        <scale_to_hfov>${scale_to_hfov}</scale_to_hfov>  <!-- if it is set to `true` your horizontal FOV will ramain as defined, othervise it depends on lens type and custom function, if there is one -->
+        <!-- clip everything that is outside of this angle -->
+        <cutoff_angle>${cutoff_angle}</cutoff_angle>
+        <env_texture_size>${env_texture_size}</env_texture_size> <!-- resolution of the cubemap texture, the highter it is - the sharper is your image -->
+      </lens>
+      <always_on>${always_on}</always_on>
+      <update_rate>${update_rate}</update_rate>
+    </camera>
+        <plugin name="plugin_name" filename="libgazebo_ros_camera.so">
+            <ros>
+            <namespace>${namespace}</namespace>
+            </ros>
+            <!-- Set camera name. If empty, defaults to sensor name (i.e. "sensor_name") -->
+            <camera_name>${prefix}</camera_name>
+            <!-- Set TF frame name. If empty, defaults to link name (i.e. "link_name") -->
+            <frame_name>${prefix}rs200_camera</frame_name>
+            <hack_baseline>${hack_baseline}</hack_baseline>
+        </plugin>
+    </sensor>
+    <material>Gazebo/Green</material>
+</gazebo>
+
+</xacro:macro>
+</robot>

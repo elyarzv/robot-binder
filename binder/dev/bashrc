@@ -1,0 +1,7 @@
+export ROS_DISTRO=noetic
+export PROJECT=phoenix1
+source /opt/ros/${ROS_DISTRO}/setup.bash
+source /opt/${PROJECT}/setup.bash 
+source /opt/simulation_ws/setup.bash
+source ${HOME}/robot_ws/install/setup.bash 
+source ${HOME}/simulation_ws/install/setup.bash

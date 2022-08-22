@@ -1,0 +1,41 @@
+PoseFollower:
+  k_trans: 2.0
+  k_rot: 0.8
+  tolerance_trans: 0.15
+  tolerance_rot: 0.13
+  tolerance_timeout: 0.3
+  holonomic: false
+  holonomic_robot: false
+  samples: 150
+  max_vel_lin: 0.5
+  min_vel_lin: 0.0
+  max_vel_th: 0.20
+  min_vel_th: 0.01
+  min_in_place_vel_th: 0.0
+  in_place_trans_vel: 0.0
+  trans_stopped_velocity: 0.0001
+  rot_stopped_velocity: 0.0001
+  allow_backwards: true
+  turn_in_place_first : true
+  max_heading_diff_before_moving: 0.3
+
+  acc_lim_x: 0.25
+  acc_lim_y: 0.0
+  acc_lim_theta: 0.5
+  max_vel_x: 0.5
+  min_vel_x: 0.1
+  max_vel_theta: 1.0
+  min_vel_theta: 0.01
+  min_in_place_vel_theta: 0.2
+  escape_vel: -0.1
+  holonomic_robot: false
+  yaw_goal_tolerance: 0.13
+  xy_goal_tolerance: 0.15
+  sim_time: 2.0
+  sim_granularity: 0.25
+  angular_sim_granularity: 0.025
+  vx_samples: 150
+  vtheta_samples: 150
+  controller_frequency: 50
+  dwa: true
+  oscillation_reset_dist: 0.02

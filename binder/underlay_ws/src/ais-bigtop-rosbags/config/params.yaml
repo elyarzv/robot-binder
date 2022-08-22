@@ -1,0 +1,20 @@
+ais_rosbags_recorder:
+  robot_status_topic_name: "/autonomy/robot_status"
+  current_state_topic_name: "/current_state"
+  rail_detections_topic_name: "/rail_detections"
+  recording_starter_topic_name: "/perception/record/start"
+  recording_stopper_topic_name: "/perception/record/stop"
+  timer_duration: 1.0
+  adjusting_flag_initial_value: False
+  rail_detection_flag_initial_value: False
+  recovery_mode_flag_initial_value: False
+  camera_down_flag_initial_vlaue: False
+  robot_current_state: 7
+  last_recovery_initial_value: False
+  recording_flag_initial_value: True
+  camera_down_error_code: "100013"
+  min_failed_detection: 10
+  states:
+    recovery: 14
+    adjusting: 10
+

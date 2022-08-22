@@ -1,0 +1,26 @@
+<launch>
+
+    <include file="$(find ais_cru_manager)/launch/cru_hostname.launch"/>
+    <!-- Check that relevant ROS Services are available-->
+    <test test-name="checkGetHostnameServicesExistence" 
+        pkg="rostest" 
+        type="advertisetest" 
+        time-limit="7.0" 
+        retry="3">
+        <rosparam>
+        services:
+        - name: /get_hostname
+          type: std_srvs/Trigger
+          timeout: 2.
+        </rosparam>
+    </test>
+
+    <!-- Check that get_hostname functionality is achieved-->
+    <test test-name="checkGetHostnameFunctionality" 
+        pkg="ais_cru_manager" 
+        type="testGetHostname" 
+        required="true"
+        time-limit="10">
+    </test>
+    
+</launch>

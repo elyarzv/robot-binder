@@ -1,0 +1,12 @@
+<launch>
+    <arg name="ROBOT_MISSION_CONFIG_FILE" default="defaultRobotMissionConfig.yaml" />
+
+    <rosparam command="load" file="$(find ais_state_machine)/config/$(arg ROBOT_MISSION_CONFIG_FILE)"/>
+
+    <node pkg="ais_state_machine" type="ais_state_machine_node" output="screen" name="ph_state_machine">
+        <remap from="embedded/cmd_vel" to="cmd_vel_state_machine" />
+        <rosparam>
+            localization_source: encoder_localization_node
+        </rosparam>
+    </node>
+</launch>

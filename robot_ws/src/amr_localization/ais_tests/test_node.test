@@ -1,0 +1,24 @@
+<launch>
+  <rosparam command="load" file="$(find relevant_package)/config/config.yaml" subst_value="true"/>
+
+  <include file="$(find relevant_package)/launch/launchfile.launch" />
+
+  <test test-name="advertisetest_test" pkg="rostest" type="advertisetest" time-limit="7.0" retry="3">
+    <rosparam>
+      topics:
+      - name: /input_topic
+        timeout: 2.
+      services:
+      - name: /service_topic
+        timeout: 2.
+    </rosparam>
+  </test>
+
+  <param name="hztest1/topic" value="/input_topic" />
+  <param name="hztest1/hz" value="100.0" />
+  <param name="hztest1/hzerror" value="0.5" />
+  <param name="hztest1/test_duration" value="5.0" />
+  <test test-name="hztest_test" pkg="rostest" type="hztest" name="hztest1" />
+
+  <test test-name="node_test" pkg="this_package" type="test_node" name="node_level_test" />
+</launch>

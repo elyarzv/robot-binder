@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="wheel_macro" params="suffix parent x y z yaw radius width mass high_fidelity_model wheel_x small_wheel_width small_wheel_radius">
+    <xacro:property name="pi" value="3.1415926835897931" />
+    <joint name="${suffix}_joint" type="continuous">
+      <origin rpy="0 0 ${-pi/2}" xyz="${x} ${y} ${z}"/>
+      <parent link="${parent}"/>
+      <child link="${suffix}_small_link"/>
+      <axis xyz="-1 0 0"/>
+      <limit effort="50000" velocity="50" />
+      <joint_properties damping="0.0" friction="0.0" />
+    </joint>
+
+    <link name="${suffix}_small_link">
+      <visual>
+        <geometry>
+          <xacro:if value="${high_fidelity_model}">
+            <mesh filename="package://phoenix_vehicle_model/meshes/uv/mecanum/TrackRollerMecanum_simp.STL"/>
+          </xacro:if>
+          <xacro:unless value="${high_fidelity_model}">
+            <cylinder length="${small_wheel_width}" radius="${small_wheel_radius}"/>
+          </xacro:unless>
+        </geometry>
+        <material name="black">
+        <color rgba="0.1 0.1 0.1 2.0"/>
+        </material>
+        <origin xyz="${width} 0 0" rpy="${wheel_x*(-pi/2)} 0 ${pi/2}"/>
+      </visual>
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="${mass*small_wheel_radius*small_wheel_radius/2}" ixy="0" ixz="0" iyy="${small_wheel_radius*small_wheel_radius*mass/4+small_wheel_width*small_wheel_width*mass/12}" iyz="0" izz="${small_wheel_radius*small_wheel_radius*mass/4+small_wheel_width*small_wheel_width*mass/12}" />
+        <origin xyz="${width} 0 0" rpy="${wheel_x*(-pi/2)} 0 ${pi/2}"/>
+      </inertial>
+      <collision>
+        <geometry>
+            <mesh filename="package://phoenix_vehicle_model/meshes/uv/mecanum/TrackRollerMecanum_simp.STL"/>
+        </geometry>
+        <origin xyz="${width} 0 0" rpy="${wheel_x*(-pi/2)} 0 ${pi/2}"/>
+      </collision>
+    </link>
+
+    <gazebo reference="${suffix}_small_link">
+      <mu1>2.4</mu1>
+      <mu2>2.4</mu2>
+      <slip1>0.0</slip1>
+      <slip2>0.0</slip2>
+      <min_depth>0.001</min_depth>
+      <kp>5e5</kp>
+      <kd>1.0</kd>
+      <material>Gazebo/White</material>
+      <self_collide>false</self_collide>
+      <sensor name="${suffix}_link" type="contact">
+          <selfCollide>true</selfCollide>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>15.0</updateRate>
+          <material>Gazebo/Red</material>
+          <contact>
+            <collision>${suffix}_small_link_collision</collision>
+          </contact>
+          <plugin name="gazebo_ros_bumper_controller" filename="libgazebo_ros_bumper.so">   
+          <bumperTopicName>${suffix}_link/collision</bumperTopicName>
+          <frameName>${suffix}_link</frameName>
+          </plugin>
+      </sensor>
+      </gazebo>
+
+
+    <transmission name="${suffix}_tran">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${suffix}_joint">
+          <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${suffix}}_wheel_motor">
+          <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+          <mechanicalReduction>33</mechanicalReduction>
+      </actuator>
+  </transmission>
+
+  </xacro:macro>
+</robot>

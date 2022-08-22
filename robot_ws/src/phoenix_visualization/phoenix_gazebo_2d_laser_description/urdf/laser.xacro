@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="pi" value="3.1415926835897931" />
+
+
+  <xacro:macro name="laser_macro" params="suffix parent namespace x y z roll pitch yaw max_range min_range min_angle max_angle visualize samples resolution update_rate topic_name">
+    <xacro:property name="sensor_box" value="0.1" />
+    <xacro:property name="mass" value="0.01" />
+    <xacro:property name="body_scale" value="1.0" />
+
+    <joint name="scan_joint${suffix}" type="fixed">
+      <origin rpy="${roll} ${pitch} ${yaw}" xyz="${x} ${y} ${z}"/>
+      <parent link="${parent}"/>
+      <child  link="${suffix}"/>
+    </joint>
+
+    <link name="${suffix}">
+      <visual>
+        <geometry>
+          <mesh filename="package://phoenix_gazebo_2d_laser_description/meshes/TIMLidar.STL" scale="${body_scale} ${body_scale} ${body_scale}"/>
+        </geometry>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <material name="red">
+          <color rgba="1.0 0.0 0.0 1.0"/>
+        </material>
+      </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <mass value="${mass}"/>
+        <inertia ixx="${(sensor_box*sensor_box+sensor_box*sensor_box)*mass/12.0}" ixy="0.0" ixz="0.0" 
+                 iyy="${(sensor_box*sensor_box+sensor_box*sensor_box)*mass/12.0}" iyz="0.0" 
+                 izz="${(sensor_box*sensor_box+sensor_box*sensor_box)*mass/12.0}"/>
+      </inertial>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="${sensor_box} ${sensor_box} ${sensor_box}"/>
+        </geometry>
+      </collision>
+    </link>
+    
+    <!-- laser plugin -->
+    <gazebo reference="${suffix}">
+      <sensor name="${suffix}_sensor_ray" type="ray">
+        <pose>0 0 0 0 0 ${yaw}</pose>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>${samples}</samples>
+              <min_angle>${min_angle}</min_angle>
+              <max_angle> ${max_angle}</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>${min_range}</min>
+            <max>${max_range}</max>
+            <resolution>${resolution}</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.001</stddev>
+          </noise>
+        </ray>
+
+        <always_on>true</always_on>
+        <visualize> ${visualize}</visualize>
+        <update_rate>${update_rate}</update_rate>
+        <!-- libgazebo_ros_ray_sensor.so-->
+        <plugin name="${suffix}_scan" filename="libgazebo_ros_laser.so">
+          <topicName>${topic_name}</topicName>
+          <frameName>${suffix}</frameName>
+          <robotNamespace>/</robotNamespace>
+        </plugin>
+      </sensor>
+      <self_collide>false</self_collide>
+    </gazebo>
+  </xacro:macro>  
+</robot>

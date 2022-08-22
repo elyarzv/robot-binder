@@ -1,0 +1,4 @@
+uint8 rail_number
+---
+bool success
+string message

@@ -1,0 +1,4 @@
+phoenix_msgs/RailMission rail_mission
+---
+bool success
+string message

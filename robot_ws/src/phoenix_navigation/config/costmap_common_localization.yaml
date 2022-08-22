@@ -1,0 +1,123 @@
+footprint: [[$(env ROBOT_FRONT),$(env ROBOT_LEFT)],[$(env ROBOT_FRONT),$(env ROBOT_RIGHT)],[$(env ROBOT_REAR),$(env ROBOT_RIGHT)],[$(env ROBOT_REAR),$(env ROBOT_LEFT)]]
+robot_base_frame: base_link
+transform_tolerance: 0.5
+inflation_local:
+    inflation_radius: $(env ROBOT_LOCAL_INFLATION)
+    cost_scaling_factor: 52.0
+
+inflation:
+    inflation_radius: $(env ROBOT_GLOBAL_INFLATION)
+
+local_obstacles_cloud:
+    footprint_clearing_enabled: true
+    combination_method: 1
+    observation_sources: cloud_sensor
+    cloud_sensor: {
+            sensor_frame: mrs_laser,
+            data_type: PointCloud2,
+            topic: /cloud,
+            expected_update_rate: 15.0,
+            marking: true, clearing: true,
+            min_obstacle_height: 0.2,
+            max_obstacle_height: 2.0,
+            obstacle_range: 10,
+            raytrace_range: 10.2
+          }
+
+global_obstacles_laser:
+    footprint_clearing_enabled: true
+    combination_method: 0
+    track_unknown_space: true
+    observation_sources: laser_sensor
+    obstacle_range: 20
+    raytrace_range: 20
+    laser_sensor: {
+    sensor_frame: base_link,
+    data_type: LaserScan,
+    topic: /scan_multi_filtered,
+    expected_update_rate: 15.0,
+    marking: true, clearing: true,
+    min_obstacle_height: -2.0,
+    max_obstacle_height: 2.0,
+    obstacle_range: 10,
+    raytrace_range: 10.2,
+    inf_is_valid: true
+    }
+
+obstacles_laser:
+    footprint_clearing_enabled: false
+    combination_method: 1
+    track_unknown_space: true
+    observation_sources: laser_sensor
+    obstacle_range: 20
+    raytrace_range: 20
+    laser_sensor: {
+      sensor_frame: base_link,
+      data_type: LaserScan,
+      topic: /scan_multi_filtered,
+      expected_update_rate: 15.0,
+      marking: true, clearing: true,
+      min_obstacle_height: -2.0,
+      max_obstacle_height: 2.0,
+      obstacle_range: 10,
+      raytrace_range: 10.2,
+      inf_is_valid: true
+      }
+global_obstacles_cloud:
+    footprint_clearing_enabled: true
+    combination_method: 0
+    observation_sources: cloud_sensor
+    cloud_sensor: {
+            sensor_frame: mrs_laser,
+            data_type: PointCloud2,
+            topic: /cloud,
+            expected_update_rate: 15.0,
+            marking: true, clearing: true,
+            min_obstacle_height: 0.2,
+            max_obstacle_height: 2.0,
+            obstacle_range: 10, raytrace_range: 10.2 }
+
+local_obstacles_laser:
+    footprint_clearing_enabled: true
+    combination_method: 1
+    track_unknown_space: true
+    #use_maximum: true
+    observation_sources: laser_sensor
+    obstacle_range: 20
+    raytrace_range: 20
+    laser_sensor: {
+        sensor_frame: base_link,
+        data_type: LaserScan,
+        topic: /scan_multi_filtered,
+        expected_update_rate: 15.0,
+        marking: true, clearing: true,
+        min_obstacle_height: -2.0,
+        max_obstacle_height: 2.0,
+        obstacle_range: 10,
+        raytrace_range: 10.2,
+        inf_is_valid: true
+        }
+
+static_user:
+      map_topic: map_user
+      subscribe_to_updates: false
+      first_map_only: true
+      use_maximum: true
+static:
+      map_topic: static_map
+      subscribe_to_updates: true
+      first_map_only: false
+
+static_obstacles:
+    use_maximum: true
+    subscribe_to_updates: true
+    first_map_only: false
+    map_topic: obstacle_map
+    trinary_costmap: false
+
+static_local_obstacles:
+    use_maximum: false
+    subscribe_to_updates: true
+    first_map_only: false
+    map_topic: obstacle_map
+    trinary_costmap: false     

@@ -1,0 +1,36 @@
+version: '3'
+services:
+  ais-binders:
+    image: "aisadmin/binders:phoenix1-binder-dev"
+    container_name: robot-phoenix1
+    environment:
+      - SSH_AUTH_SOCK
+      - TERM
+      - DISPLAY
+      - VIDEO_GROUP_ID
+    env_file:
+      - ./phoenix1/uv_compose/${UV_MODE:-deploy}.env
+      - ./phoenix1/uv_compose/aws-webrtc-credentials.env
+    devices:
+      -  /dev/dri:/dev/dri
+    volumes:
+      - "/etc/group:/etc/group:ro"
+      - "/etc/passwd:/etc/passwd:ro"
+      - "/etc/shadow:/etc/shadow:ro"
+      - "/etc/sudoers.d:/etc/sudoers.d:ro"
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+      - "/dev:/dev"
+      - "${HOME}/log/ais/uv_robot:/root/uv_robot/log:rw"
+      - "${HOME}/maps:/root/uv_robot/maps:rw"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+      - "./.ais:/root/.ais"
+      - "./dev_entrypoint.bash:/root/dev_entrypoint.bash:ro"
+    network_mode: host
+    privileged: true
+    cap_add:
+      - SYS_PTRACE
+    dns_search:
+      - 8.8.8.8
+      - 4.2.2.4
+    restart: always

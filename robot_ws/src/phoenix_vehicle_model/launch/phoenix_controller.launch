@@ -1,0 +1,10 @@
+<launch>
+  <rosparam command="load" file="$(find phoenix_vehicle_model)/config/phoenix_controller.yaml" />
+
+  <node name="controller_spawner" pkg="controller_manager" type="spawner"
+        args="phoenix_joint_publisher phoenix_wheel1_controller phoenix_wheel2_controller phoenix_wheel3_controller phoenix_wheel4_controller" />
+  
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" respawn="false"/>
+
+</launch>
+

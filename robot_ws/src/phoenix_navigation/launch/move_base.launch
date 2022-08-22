@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="global_planner" default="global_planner"/>
+  <!-- <arg name="global_planner" default="navfn"/> -->
+  <!-- <arg name="global_planner" default="ais_global_planner"/> -->
+  <!-- <arg name="global_planner" default="sbpl"/> -->
+
+  <!-- <arg name="local_planner" default="trajectory"/> -->
+  <arg name="local_planner" default="teb"/>
+  <!-- <arg name="local_planner" default="dwa"/> -->
+  <!-- <arg name="local_planner" default="pose_follower"/> -->
+
+  <arg name="controller_frequency" default="10.0"/>
+  <arg name="planner_frequency" default="3.0"/>
+  <arg name="use_odom_filtered" default="true"/>
+
+  <!-- global planner -->
+  <group ns="move_base" if="$(eval arg('global_planner') == 'global_planner')">
+    <param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+    <param name="publish_potential" value="True"/>
+    <param name="allow_unknown" value="false"/>
+    <param name="default_tolerance" value="0.2"/>
+    <param name="visualize_potential" value="false"/>
+    <param name="use_dijkstra" value="false"/>
+    <param name="use_quadratic" value="false"/>
+    <param name="old_navfn_behavior" value="false"/>
+    <param name="orientation_window_size" value="3"/>
+    <param name="orientation_mode" value="1"/>
+  </group>
+
+  <group ns="move_base" if="$(eval arg('global_planner') == 'ais_global_planner')">
+    <param name="base_global_planner" value="ais_global_planner/AISGlobalPlanner" />
+    <param name="publish_potential" value="True"/>
+    <param name="allow_unknown" value="false"/>
+    <param name="default_tolerance" value="0.2"/>
+    <param name="visualize_potential" value="false"/>
+    <param name="use_dijkstra" value="false"/>
+    <param name="use_quadratic" value="false"/>
+    <param name="old_navfn_behavior" value="false"/>
+    <param name="orientation_window_size" value="3"/>
+    <param name="orientation_mode" value="7"/>
+    <param name="AISGlobalPlanner/orientation_mode" value="1"/>
+  </group>
+
+  <group ns="move_base" if="$(eval arg('global_planner') == 'sbpl')">
+    <param name="base_global_planner" value="SBPLLatticePlanner"/>
+    <rosparam file="$(find phoenix_navigation)/config/sbpl.yaml" command="load" subst_value="true"/>
+  </group>
+
+  <group ns="move_base" if="$(eval arg('global_planner') == 'navfn')">
+    <param name="base_global_planner" value="navfn/NavfnROS"/>
+  </group>
+
+  <!-- local planner -->
+  <group ns="move_base" if="$(eval arg('local_planner') == 'teb')">
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
+    <rosparam file="$(find phoenix_navigation)/config/teb_planner.yaml" command="load" subst_value="true"/>
+    <!-- <include file="$(find viapoints_publisher)/launch/viapoints_publisher.launch"/> -->
+  </group>
+
+  <group ns="move_base" if="$(eval arg('local_planner') == 'pose_follower')">
+    <param name="base_local_planner" value="pose_follower/PoseFollower"/>
+    <rosparam file="$(find phoenix_navigation)/config/pose_follower.yaml" command="load"/>
+  </group>
+
+  <group ns="move_base" if="$(eval arg('local_planner') == 'trajectory')">
+    <param name="base_local_planner" value="base_local_planner/TrajectoryPlannerROS"/>
+  </group>
+
+  <group ns="move_base" if="$(eval arg('local_planner') == 'dwa')">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+  </group>
+
+  <!-- move base node -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <param name="controller_frequency" value="$(arg controller_frequency)"/>
+    <param name="planner_frequency" value="$(arg planner_frequency)"/>
+    <param name="max_planning_retries" value="3"/>
+    <param name="oscillation_timeout" value="15"/>
+    <param name="oscillation_distance" value="0.1"/>
+    <param name="recovery_behavior_enabled" value="true"/>
+    <param name="clearing_rotation_allowed" value="false"/>
+
+    <param name="GlobalPlanner/allow_unknown" value="false"/>
+    <param name="default_tolerance" value="0.2"/>
+    <!-- <param name="publish_potential" value="True"/> -->
+
+    <!-- local costmap, needs size -->
+    <rosparam file="$(find phoenix_navigation)/config/costmap_local.yaml" command="load" subst_value="true"/>
+    <!-- observation sources located in costmap_common.yaml -->
+    <rosparam file="$(find phoenix_navigation)/config/costmap_common.yaml" command="load" ns="global_costmap" subst_value="true"/>
+    <rosparam file="$(find phoenix_navigation)/config/costmap_common.yaml" command="load" ns="local_costmap"  subst_value="true"/>
+    <rosparam file="$(find phoenix_navigation)/config/costmap_global_laser.yaml" command="load" subst_value="true"/>
+
+    <!-- global costmap with laser-->
+    <param name="global_costmap/width" value="100.0" />
+    <param name="global_costmap/height" value="100.0"/>
+
+    <remap from="/odom" to="/odometry/filtered" if="$(arg use_odom_filtered)"/>
+    <remap from="/cmd_vel" to="/embedded/navigation_cmd_vel"/>
+  </node>
+
+</launch>
+

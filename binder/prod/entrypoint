@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+#source ${WORKSPACE}/install/setup.bash
+#source ${WORKSPACE}/install/local_setup.bash
+source /root/.bashrc
+cd ${WORKSPACE}
+
+exec "$@"

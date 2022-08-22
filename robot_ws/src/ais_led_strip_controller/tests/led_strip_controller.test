@@ -1,0 +1,11 @@
+<launch>
+    <include file="$(find ais_led_strip_controller)/launch/led_strip_controller.launch"/>
+
+    <test 
+        test-name="checkLedStripController"
+        pkg="ais_led_strip_controller"
+        type="LedStripControllerTest"
+        required="true"
+        time-limit="30.0">
+    </test>
+</launch>

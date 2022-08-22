@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="diff_drive" params="joint1 joint2 joint3 joint4 vel_topic_name odom_topic_name update_rate num_wheel_pairs wheel_separation wheel_diameter max_wheel_torque max_wheel_acceleration publish_odom publish_odom_tf publish_wheel_tf odometry_frame odometry_source robot_base_frame">
+
+  <gazebo>
+    <plugin name="diff_drive_front" filename="libgazebo_ros_diff_drive.so">
+      <commandTopic>${vel_topic_name}</commandTopic>
+      <odometryTopic>${odom_topic_name}</odometryTopic>
+      <odometryFrame>${odometry_frame}</odometryFrame>
+      <odometrySource>${odometry_source}</odometrySource>      
+      <publish_odom_tf>${publish_odom_tf}</publish_odom_tf>
+      <robotBaseFrame>${robot_base_frame}</robotBaseFrame>
+      <publishWheelTF>${publish_wheel_tf}</publishWheelTF>
+      <publishTf>false</publishTf>
+      <publishWheelJointState>false</publishWheelJointState>
+      <legacyMode>true</legacyMode>
+      <updateRate>${update_rate}</updateRate>
+      <numWheelPairs>${num_wheel_pairs}</numWheelPairs>
+      <leftJoint>${joint1}</leftJoint>
+      <rightJoint>${joint2}</rightJoint>
+      <leftJoint>${joint3}</leftJoint>
+      <rightJoint>${joint4}</rightJoint>      
+      <wheelSeparation>${wheel_separation}</wheelSeparation>
+      <wheelDiameter>${wheel_diameter}</wheelDiameter>
+      <wheelAcceleration>${max_wheel_acceleration}</wheelAcceleration>
+      <wheelTorque>${max_wheel_torque}</wheelTorque>
+      <rosDebugLevel>na</rosDebugLevel>
+    </plugin>
+  </gazebo>
+
+  </xacro:macro>
+</robot>
+

@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Starting BUILD at `date` 
+  build:
+    commands:
+      - mkdir -p ~/.ssh
+      - echo -e ${id_rsa} | sed 's/^-e //' > ~/.ssh/id_rsa
+      - echo ${id_rsa_pub} > ~/.ssh/id_rsa.pub
+      - chmod 600 ~/.ssh/id_rsa
+      - apt-get update -y; apt-get install expect -qy
+      - THIS_SCRIPT="$(date +%Y-%m-%d_%H-%M-%S-%N)".sh
+      - rm -rf ~/temp; mkdir -p ~/temp
+      - echo 'echo ${PASSW}' > ~/temp/$THIS_SCRIPT
+      - echo 'Host bitbucket.org \n
+                HostName bitbucket.org \n
+                User git \n 
+                IdentityFile /root/.ssh/id_rsa \n
+                IdentitiesOnly yes
+             ' > ~/.ssh/config
+      - chmod +x ~/temp/$THIS_SCRIPT; 
+      - eval "$(ssh-agent -s)"; sleep 0.5;
+      - DISPLAY=":0.0" SSH_ASKPASS="/root/temp/$THIS_SCRIPT" setsid ssh-add ~/.ssh/id_rsa </dev/null
+      - rm -rf ~/temp; mkdir -p ~/temp;
+      - ssh -T git@bitbucket.org
+      - make clone 
+      - make docker-login 
+      - docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+      - make docker-build-dev
+      - ./binder/testing/uvbot_tests.bash 
+      - make docker-push-dev
+  post_build:
+    commands:
+      - echo BUILD successful

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="skid_steer" params="joint1 joint2 joint3 joint4 vel_topic_name odom_topic_name update_rate num_wheel_pairs wheel_separation wheel_diameter max_wheel_torque max_wheel_acceleration publish_odom publish_odom_tf publish_wheel_tf odometry_frame odometry_source robot_base_frame">
+  <gazebo>
+  <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+    <updateRate>100.0</updateRate>
+    <robotNamespace>/</robotNamespace>
+    <leftFrontJoint>${joint1}</leftFrontJoint>
+    <rightFrontJoint>${joint2}</rightFrontJoint>
+    <leftRearJoint>${joint3}</leftRearJoint>
+    <rightRearJoint>${joint4}</rightRearJoint>
+    <wheelSeparation>${wheel_separation}</wheelSeparation>
+    <wheelDiameter>${wheel_diameter}</wheelDiameter>
+    <robotBaseFrame>${robot_base_frame}</robotBaseFrame>
+    <torque>200</torque>
+    <MaxForce>5.0</MaxForce>
+    <commandTopic>${vel_topic_name}</commandTopic>
+    <odometryTopic>${odom_topic_name}</odometryTopic>
+    <odometryFrame>odom</odometryFrame>
+    <broadcastTF>${publish_odom_tf}</broadcastTF>
+    <covariance_x>0.001</covariance_x> <!-- 0.0001 -->
+    <covariance_y>0.001</covariance_y> <!-- 0.0001 -->
+    <covariance_yaw>0.01</covariance_yaw> <!-- 0.01 -->
+  </plugin>
+</gazebo>
+
+  </xacro:macro>
+</robot>

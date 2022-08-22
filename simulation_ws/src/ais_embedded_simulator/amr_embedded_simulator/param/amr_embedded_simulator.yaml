@@ -1,0 +1,13 @@
+# looprate is in hz, however make sure you use double instead of integer or this will crash. # joystick should be on D.
+---
+
+/**:
+    ros__parameters:
+      looprate: 10.0
+      output_cmd_topic_name: "/cmd_vel_test" # output topic to the diff drive/mecanum drive plugin in simulation
+      input_cmd_topic_name: "/cmd_vel" # input topic for the velocity command
+      mileage_factor: 0.033
+      voltage_factor: 0.01
+      max_voltage: 29.5
+      low_voltage: 23.5
+    

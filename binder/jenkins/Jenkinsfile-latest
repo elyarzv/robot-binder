@@ -1,0 +1,54 @@
+pipeline {
+  agent {
+    label 'linux'
+  }
+  stages {
+  stage('latest') {
+      when {
+        branch 'develop'
+      }
+      steps {
+        echo "Build number is ${currentBuild.number}"
+        withCredentials([
+          [
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'AIS-AWS',
+            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+            stsTokenDuration: 7200
+          ]
+        ]) {
+          sh '''#!/bin/bash
+          make docker-prune
+          export TAG=`echo $GIT_BRANCH | tr / -`
+          export LATEST=-latest
+          echo ${TAG}
+          make TAG="${TAG}"
+          make LATEST="${LATEST}"
+          make docker-login
+          make docker-build-base
+          make docker-build-dev
+          make docker-build-prod
+          make docker-push-base
+          make docker-push-dev
+          make docker-push-prod
+          make docker-prune
+
+          '''
+        }
+      }
+    }
+  }
+  post {
+    always {
+      echo currentBuild.currentResult
+      deleteDir() /* clean up our workspace */
+      cleanWs()
+    }
+  }
+
+  options {
+    buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5'))
+    disableConcurrentBuilds()
+  }
+}

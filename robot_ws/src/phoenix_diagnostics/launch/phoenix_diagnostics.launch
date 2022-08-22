@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <rosparam command="load" file="$(find phoenix_diagnostics)/params/diagnostics_params.yaml" />
+  <node pkg="phoenix_diagnostics" name="phoenix_diagnostics" type="phoenix_diagnostics_node.py" respawn="true" output="screen"/>
+</launch>
